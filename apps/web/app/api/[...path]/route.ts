@@ -1,13 +1,6 @@
 import { NextRequest } from 'next/server';
-import {
-  PageNumber,
-  RepositoryName,
-  DraftStatus,
-  z,
-  type OwnedRepositoryDTO,
-} from '@openself/shared/api';
+import { PageNumber, RepositoryName, z, type OwnedRepositoryDTO } from '@openself/shared/api';
 import { AppError } from '@openself/shared/errors';
-import { draftDTO } from '@openself/core/drafts';
 import { authenticated, body, respond, preflight } from '../../../lib/request';
 import { getWorkspace } from '../../../lib/workspace';
 import { getAI } from '../../../lib/ai';
@@ -123,27 +116,6 @@ async function route(request: NextRequest, { params }: { params: Promise<{ path:
       }
       if (method === 'GET' && path[3] === 'pulls' && path.length === 4)
         return github.listPulls(owner, repo, state, page());
-    }
-    if (path[0] === 'drafts') {
-      if (path.length === 1 && method === 'GET') {
-        const status = query.get('status');
-        return {
-          items: (
-            await workspace.drafts.list(user.id, status ? DraftStatus.parse(status) : undefined)
-          ).map(draftDTO),
-        };
-      }
-      if (path.length === 1 && method === 'POST')
-        return draftDTO(await workspace.drafts.create(user, await body(request)));
-      const id = z.uuid().parse(path[1]);
-      if (path.length === 2 && method === 'GET')
-        return draftDTO(await workspace.drafts.find(user.id, id));
-      if (path.length === 2 && method === 'PATCH')
-        return draftDTO(await workspace.drafts.update(user, id, await body(request)));
-      if (path.length === 2 && method === 'DELETE')
-        return draftDTO(await workspace.drafts.discard(user.id, id));
-      if (path.length === 3 && path[2] === 'approve' && method === 'POST')
-        return draftDTO(await workspace.drafts.approve(user.id, id));
     }
     if (path[0] === 'audit' && path.length === 1 && method === 'GET')
       return { items: await workspace.drafts.audit(user.id, page()) };

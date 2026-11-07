@@ -91,6 +91,20 @@ export const DraftStatus = z.enum([
   'failed',
   'discarded',
 ]);
+export const DraftListInput = z.object({
+  kind: z.enum(['issue', 'pull_request', 'review']).optional(),
+  status: DraftStatus.optional(),
+  q: z.string().trim().max(200).default(''),
+  page: z.coerce.number().int().min(1).max(50).default(1),
+});
+export type DraftGitHubStatus = {
+  draftId: string;
+  kind: 'issue' | 'pull_request';
+  state: 'open' | 'closed' | 'merged' | 'draft' | 'unavailable';
+  number?: number;
+  checkedAt: string;
+  error?: string;
+};
 export const UpdatePreferences = z
   .object({
     locale: z.enum(['zh', 'en']).optional(),

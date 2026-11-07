@@ -267,7 +267,7 @@ export function ReviewWorkbench({ owner, repo, n }: { owner: string; repo: strin
                   {busy ? t('saving') : t('generateReview')}
                 </Button>
                 {saved && (
-                  <Link className="saved-link" href="/drafts">
+                  <Link className="saved-link" href="/drafts?kind=review">
                     {t('viewDrafts')}
                   </Link>
                 )}

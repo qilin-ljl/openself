@@ -1,5 +1,11 @@
-import { type Database, schema, eq, and, desc, inArray, gte, sql } from '@openself/db';
-import { CreateDraft, IssuePayload, ReviewPayload, DraftDTO } from '@openself/shared/api';
+import { type Database, schema, eq, and, or, desc, inArray, gte, sql } from '@openself/db';
+import {
+  CreateDraft,
+  IssuePayload,
+  ReviewPayload,
+  DraftDTO,
+  DraftListInput,
+} from '@openself/shared/api';
 import { prepareReview } from './prepare-review';
 import { AppError } from '@openself/shared/errors';
 import type { Environment } from '@openself/shared/env';
@@ -60,6 +66,47 @@ export function createDraftService(deps: DraftDependencies) {
   }
   return {
     find,
+    async search(userId: string, input: unknown) {
+      const parsed = DraftListInput.parse(input);
+      const pattern = '%' + parsed.q.replace(/[\\%_]/g, '\\$&') + '%';
+      const number = /^#?\d+$/.test(parsed.q) ? Number(parsed.q.replace('#', '')) : undefined;
+      const numeric =
+        number !== undefined && Number.isSafeInteger(number) && number > 0 ? number : undefined;
+      const filter = and(
+        eq(schema.drafts.userId, userId),
+        parsed.kind ? eq(schema.drafts.kind, parsed.kind) : undefined,
+        parsed.status ? eq(schema.drafts.status, parsed.status) : undefined,
+        parsed.q
+          ? or(
+              sql`${schema.drafts.payloadJson}->>'title' ilike ${pattern}`,
+              sql`${schema.drafts.payloadJson}->>'body' ilike ${pattern}`,
+              sql`${schema.drafts.repoFullName} ilike ${pattern}`,
+              sql`${schema.drafts.githubUrl} ilike ${pattern}`,
+              numeric !== undefined
+                ? or(
+                    sql`${schema.drafts.targetNumber}::text = ${String(numeric)}`,
+                    sql`${schema.drafts.githubUrl} ~ ${'/(pull|issues)/' + numeric + '([#?]|$)'}`,
+                  )
+                : undefined,
+            )
+          : undefined,
+      );
+      const [items, totals] = await Promise.all([
+        db
+          .select()
+          .from(schema.drafts)
+          .where(filter)
+          .orderBy(desc(schema.drafts.updatedAt), desc(schema.drafts.id))
+          .limit(20)
+          .offset((parsed.page - 1) * 20),
+        db
+          .select({ count: sql<number>`count(*)::int` })
+          .from(schema.drafts)
+          .where(filter),
+      ]);
+      const total = totals[0]?.count ?? 0;
+      return { items, total, more: parsed.page * 20 < total };
+    },
     async list(userId: string, status?: Draft['status']) {
       return db
         .select()

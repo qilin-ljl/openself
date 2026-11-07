@@ -118,7 +118,7 @@
     "viewDrafts": "查看草稿队列",
     "required": "必填",
     "choose": "请选择",
-    "draftsDescription": "检查即将以你的 GitHub 身份发布的内容。批准后进入后台发布队列。",
+    "draftsDescription": "分类管理草稿、搜索历史记录，并查看已发布内容在 GitHub 上的后续状态。",
     "all": "全部",
     "approve": "批准并发布",
     "discard": "丢弃",
@@ -543,5 +543,35 @@
       "translate": "翻译",
       "other": "AI 处理"
     }
+  },
+  "drafts": {
+    "kindLabel": "草稿分类",
+    "kind": {
+      "issue": "Issue",
+      "pull_request": "我的 PR",
+      "review": "PR 审查意见"
+    },
+    "allKinds": "全部类型",
+    "searchLabel": "搜索我的草稿与发布记录",
+    "searchHint": "标题、正文、仓库名或 #编号",
+    "refresh": "刷新 GitHub 状态",
+    "statusNote": "本地发布状态和 GitHub 状态分别显示。PR 可显示已合并；Issue 显示开放或关闭。GitHub 状态约每分钟同步，也可以手动刷新。",
+    "publicationFilter": "本地发布状态筛选",
+    "publication": "发布",
+    "githubState": "GitHub",
+    "targetPR": "目标 PR",
+    "checkedAt": "同步于 {time}",
+    "remote": {
+      "open": "开放中",
+      "closed": "已关闭",
+      "merged": "已合并",
+      "draft": "草稿 PR（未合并）",
+      "unavailable": "暂时无法读取",
+      "loading": "读取状态…",
+      "closedUnmerged": "已关闭（未合并）"
+    },
+    "remoteFailed": "GitHub 状态刷新失败，已显示的状态是上次同步结果，不能据此判断最新是否合并。可点击“刷新 GitHub 状态”重试。",
+    "results": "找到 {count} 条记录",
+    "emptyFiltered": "这个分类和筛选条件下没有记录。可切换分类、清空搜索或选择“全部”发布状态。"
   }
 }

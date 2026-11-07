@@ -8,6 +8,8 @@ The v0.3 implementation adds model-default output budgets (no max_tokens paramet
 
 At the user's explicit request, automated tests, browser tests and live AI calls were NOT run for v0.3. Workspace type checking, lint and production build pass. A user-reported task-list 404 was diagnosed with a narrowly scoped authenticated read: after introducing dedicated job routes, the API returned HTTP 200 with 20 existing records. No AI task was submitted during that diagnosis; the temporary diagnostic session was revoked. The historical 147-test and browser/live results below belong to v0.2 and are not v0.3 acceptance evidence. Existing v0.2 test fixtures may need adaptation to the new planning stage and defaults. Source selection uses bounded manifests, sampled symbol outlines and heuristic direct-import relationships; it does not build a complete semantic dependency graph. Cache reuse is scoped to the same user and pinned commit, not arbitrary changed commits.
 
+Draft queue extension: separate issue, authored PR and review categories; user-scoped server-side search over titles, bodies, repositories, URLs and numbers; paginated history; separate read-only GitHub state lookups for published items. Review entries track the target PR. Access failures remain unknown instead of implying closed/merged. This extension follows the same requested verification scope: no new tests and no test suite execution.
+
 ## Historical v0.2 verification
 
 

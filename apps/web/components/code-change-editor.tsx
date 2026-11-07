@@ -115,7 +115,7 @@ export function CodeChangeEditor({ jobId }: { jobId: string }) {
               {busy ? t('working') : t('savePRDraft')}
             </Button>
             {saved && (
-              <Link className="text-link" href="/drafts">
+              <Link className="text-link" href="/drafts?kind=pull_request">
                 {w('viewDrafts')}
               </Link>
             )}

@@ -118,7 +118,7 @@
     "viewDrafts": "View drafts",
     "required": "Required",
     "choose": "Choose an option",
-    "draftsDescription": "Review what will be published under your GitHub identity. Approval queues publication.",
+    "draftsDescription": "Organize drafts by type, search history and track published items on GitHub.",
     "all": "All",
     "approve": "Approve & publish",
     "discard": "Discard",
@@ -543,5 +543,35 @@
       "translate": "Translation",
       "other": "AI task"
     }
+  },
+  "drafts": {
+    "kindLabel": "Draft category",
+    "kind": {
+      "issue": "Issue",
+      "pull_request": "My PRs",
+      "review": "PR reviews"
+    },
+    "allKinds": "All types",
+    "searchLabel": "Search my drafts and published items",
+    "searchHint": "Title, body, repository or #number",
+    "refresh": "Refresh GitHub status",
+    "statusNote": "Publication status and GitHub status are separate. PRs can be merged; issues are open or closed. GitHub state refreshes about every minute or on request.",
+    "publicationFilter": "Filter publication status",
+    "publication": "Publication",
+    "githubState": "GitHub",
+    "targetPR": "Target PR",
+    "checkedAt": "Checked at {time}",
+    "remote": {
+      "open": "Open",
+      "closed": "Closed",
+      "merged": "Merged",
+      "draft": "Draft PR (not merged)",
+      "unavailable": "Unavailable",
+      "loading": "Loading status…",
+      "closedUnmerged": "Closed without merging"
+    },
+    "remoteFailed": "GitHub refresh failed. Any displayed state is from the previous sync and may be outdated. Use Refresh GitHub status to retry.",
+    "results": "{count} matching records",
+    "emptyFiltered": "No records match this category and filter. Switch categories, clear the search or select all publication states."
   }
 }

@@ -492,3 +492,47 @@ input[type='checkbox'] {
 .app-nav {
   gap: 20px;
 }
+.draft-kind-tabs {
+  border-bottom: 1px solid var(--line);
+  padding-bottom: 16px;
+  margin-bottom: 20px;
+}
+.draft-search-row {
+  display: flex;
+  gap: 16px;
+  align-items: flex-end;
+  margin-bottom: 12px;
+}
+.draft-search-row .field-label {
+  flex: 1;
+  margin: 0;
+}
+.draft-search-row input {
+  width: 100%;
+}
+.draft-github-state {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin: 14px 0;
+}
+.draft-github-state .error-notice {
+  width: 100%;
+}
+.github-merged {
+  color: #6b21a8;
+  border-color: #d8b4fe;
+}
+.github-open {
+  color: #146c43;
+  border-color: #a3d5b9;
+}
+.github-closed {
+  color: #6b6b73;
+  border-color: var(--line);
+}
+.github-unavailable {
+  color: #a62536;
+  border-color: #e4a4aa;
+}

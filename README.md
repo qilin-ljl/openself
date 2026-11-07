@@ -21,6 +21,8 @@ A bilingual GitHub contribution workspace. Issues, review comments and new pull 
 
 本次按用户要求未运行自动化测试、浏览器测试或真实 AI 联调；类型、lint 和构建检查记录在 RELEASE_STATUS.md。模型输出质量、耗时和新任务流程仍需实际使用反馈。
 
+草稿队列支持 Issue / 我的 PR / PR 审查意见分类、按标题/正文/仓库/#编号搜索及分页。已发布内容会只读同步 GitHub 状态：PR 是否合并、关闭或仍为草稿；Issue 开放或关闭。状态约每分钟更新，并有手动刷新和同步时间；读取失败不会被解释为关闭或合并。
+
 ## Current status
 
 OpenSelf is delivered as a local application: GitHub authentication and browsing, manual and AI PR review, repository rule cards, review style learning, issue duplicate checks/drafting/quality/translation, approval queues, usage statistics, contribution radar, and a Chrome/Edge side panel. Local use is not restricted to a test repository; GitHub permissions and explicit draft approval still apply. Real sign-in and approved issue/review publication have been verified locally. Cloud deployment and store submission are optional future work, not requirements for this local edition. See [RELEASE_STATUS.md](RELEASE_STATUS.md) for verification coverage.

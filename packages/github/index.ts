@@ -144,6 +144,10 @@ export function createGitHubClient(
   }
   return {
     getPull,
+    getIssue: (owner: string, repo: string, number: number) =>
+      read(`issue:${owner}/${repo}:${number}`, (headers) =>
+        octokit.rest.issues.get({ owner, repo, issue_number: number, headers }),
+      ),
     listPullFiles,
     getGitCommit: (owner: string, repo: string, sha: string) =>
       read('git-commit:' + owner + '/' + repo + '@' + sha, (headers) =>
