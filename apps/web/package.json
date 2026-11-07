@@ -1,0 +1,33 @@
+{
+  "name": "web",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "tsx ../../scripts/web.ts dev",
+    "build": "next build",
+    "start": "tsx ../../scripts/web.ts start",
+    "typecheck": "next typegen && tsc --noEmit",
+    "preview": "next dev"
+  },
+  "dependencies": {
+    "@git-diff-view/react": "latest",
+    "@openself/core": "workspace:*",
+    "@openself/db": "workspace:*",
+    "@openself/github": "workspace:*",
+    "@openself/i18n": "workspace:*",
+    "@openself/shared": "workspace:*",
+    "@openself/ui": "workspace:*",
+    "@tailwindcss/postcss": "latest",
+    "arctic": "latest",
+    "dotenv": "latest",
+    "lucide-react": "latest",
+    "next": "latest",
+    "next-intl": "latest",
+    "react": "latest",
+    "react-dom": "latest",
+    "react-markdown": "latest",
+    "rehype-sanitize": "latest",
+    "remark-gfm": "latest",
+    "tailwindcss": "latest"
+  }
+}

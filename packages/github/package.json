@@ -1,0 +1,23 @@
+{
+  "name": "@openself/github",
+  "private": true,
+  "type": "module",
+  "exports": {
+    ".": "./index.ts",
+    "./templates": "./templates.ts",
+    "./diff": "./diff.ts",
+    "./links": "./links.ts",
+    "./review": "./review.ts"
+  },
+  "scripts": {
+    "typecheck": "tsc"
+  },
+  "dependencies": {
+    "@octokit/graphql": "latest",
+    "@octokit/plugin-retry": "latest",
+    "@octokit/plugin-throttling": "latest",
+    "@octokit/rest": "latest",
+    "@openself/shared": "workspace:*",
+    "yaml": "^2.9.1"
+  }
+}

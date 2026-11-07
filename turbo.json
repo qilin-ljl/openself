@@ -1,0 +1,41 @@
+{
+  "$schema": "https://turbo.build/schema.json",
+  "tasks": {
+    "build": {
+      "dependsOn": ["^build"],
+      "outputs": [".next/**", "!.next/cache/**", "dist/**"],
+      "env": ["APP_URL"]
+    },
+    "typecheck": {
+      "dependsOn": ["^typecheck"],
+      "outputs": []
+    },
+    "dev": {
+      "cache": false,
+      "persistent": true
+    },
+    "worker#build": {
+      "dependsOn": ["^build"],
+      "outputs": []
+    },
+    "extension#build": {
+      "dependsOn": ["^build"],
+      "outputs": [".output/**"],
+      "env": ["WXT_APP_URL"]
+    }
+  },
+  "globalPassThroughEnv": [
+    "DATABASE_URL",
+    "REDIS_URL",
+    "GITHUB_CLIENT_ID",
+    "GITHUB_CLIENT_SECRET",
+    "ENCRYPTION_KEY",
+    "DEEPSEEK_BASE_URL",
+    "LLM_MODEL_FAST",
+    "LLM_MODEL_DEEP",
+    "LLM_DEEP_THINKING",
+    "REVIEW_MAX_FILES",
+    "SESSION_COOKIE_NAME",
+    "EXTENSION_IDS"
+  ]
+}

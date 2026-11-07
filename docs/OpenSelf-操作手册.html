@@ -1,0 +1,380 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>OpenSelf 操作手册 · 从第一次使用到发布</title>
+  <style>
+    :root{--blue:#002fa7;--ink:#151518;--muted:#66666f;--line:#e4e4e8;--surface:#f7f7f8}
+    *{box-sizing:border-box}html{scroll-behavior:smooth;scroll-padding-top:30px}
+    body{margin:0;color:var(--ink);background:#fff;font:16px/1.85 "Helvetica Neue",Helvetica,Arial,"Microsoft YaHei",sans-serif;min-width:960px}
+    a{color:var(--blue);text-underline-offset:4px}a:hover{text-decoration-thickness:2px}
+    a:focus-visible,button:focus-visible{outline:3px solid var(--blue);outline-offset:4px}
+    .layout{display:grid;grid-template-columns:242px minmax(0,1fr);max-width:1440px;margin:auto}
+    aside{position:sticky;top:0;height:100vh;overflow:auto;padding:36px 24px;border-right:1px solid var(--line)}
+    .brand{font-size:26px;font-weight:750;letter-spacing:-1px;line-height:1.2;margin-bottom:8px}
+    .edition{font-size:12px;color:var(--muted);margin:0 0 28px}
+    nav a{display:flex;gap:12px;padding:8px 0;text-decoration:none;color:var(--ink);font-size:14px;border-bottom:1px solid var(--line)}
+    nav span{color:var(--blue);font-variant-numeric:tabular-nums}nav a:hover{color:var(--blue)}
+    .sidebar-foot{font-size:12px;color:var(--muted);margin-top:26px}
+    main{min-width:0;padding:48px 64px 56px;max-width:1120px}
+    header{border-bottom:2px solid var(--ink);padding-bottom:32px;margin-bottom:38px}
+    .eyebrow{font-size:13px;color:var(--blue);font-weight:700;letter-spacing:.04em;margin:0 0 16px}
+    h1{font-size:48px;line-height:1.25;letter-spacing:-2px;margin:0 0 20px;font-weight:750}
+    .lead{font-size:19px;max-width:740px;margin-bottom:24px}
+    p{margin:10px 0}h2{font-size:28px;line-height:1.4;margin:0 0 20px;letter-spacing:-.6px}
+    h3{font-size:19px;margin:24px 0 10px}h4{font-size:16px;margin:20px 0 7px}
+    section{padding:34px 0;border-bottom:1px solid var(--line)}
+    .section-heading{display:flex;gap:22px;align-items:baseline}
+    .number{color:var(--blue);font-size:29px;line-height:1;min-width:42px;font-weight:700;font-variant-numeric:tabular-nums}
+    .actions{display:flex;gap:12px;flex-wrap:wrap;margin-top:20px}
+    .button,button{display:inline-block;border:1px solid var(--blue);background:#fff;color:var(--blue);padding:10px 17px;font-family:inherit;font-size:14px;font-weight:600;line-height:1.5;cursor:pointer;text-decoration:none}
+    .button.primary{background:var(--blue);color:#fff}.small{font-size:13px;color:var(--muted)}
+    .note{border-left:4px solid var(--blue);background:var(--surface);padding:15px 20px;margin:20px 0}
+    .note p:first-child{margin-top:0}.note p:last-child{margin-bottom:0}
+    .note strong{color:var(--blue)}.plain-note{border-top:1px solid var(--line);padding-top:12px;color:var(--muted);font-size:14px}
+    ol,ul{padding-left:24px;margin:10px 0 20px}li{padding-left:5px;margin:8px 0}
+    .steps li{padding:8px 0 8px 7px;border-bottom:1px solid var(--line)}
+    .steps li:last-child{border-bottom:0}.result{display:block;color:var(--muted);font-size:14px;margin-top:3px}
+    .tag{display:inline-block;border:1px solid var(--line);background:#fff;padding:0 7px;font-size:14px;font-weight:600;white-space:nowrap}
+    table{width:100%;border-collapse:collapse;margin:16px 0 22px;font-size:14px;table-layout:fixed}
+    th,td{border:1px solid var(--line);padding:12px 14px;text-align:left;vertical-align:top;overflow-wrap:anywhere}
+    th{background:var(--surface);font-weight:650}td:first-child{font-weight:600}
+    .flow{display:grid;grid-template-columns:repeat(4,1fr);border:1px solid var(--line);margin:22px 0}
+    .flow>div{padding:16px;border-right:1px solid var(--line)}.flow>div:last-child{border-right:0;background:var(--blue);color:#fff}
+    .flow b{display:block;font-size:15px}.flow span{display:block;font-size:12px;margin-top:6px}
+    .cols{display:grid;grid-template-columns:1fr 1fr;gap:24px}.cols>div{border-top:2px solid var(--blue)}
+    pre{white-space:pre-wrap;overflow-wrap:anywhere;background:var(--surface);border:1px solid var(--line);padding:18px 20px;line-height:1.8;font-size:14px;margin:12px 0 18px}
+    code{font-family:Consolas,"Microsoft YaHei",monospace;font-size:.9em;overflow-wrap:anywhere}
+    .sample-label{font-size:13px;color:var(--muted);margin-bottom:0}
+    details{border-bottom:1px solid var(--line);padding:15px 0}
+    summary{cursor:pointer;font-size:17px;font-weight:650}details p{padding-left:20px;font-size:15px}
+    footer{font-size:13px;color:var(--muted);padding-top:26px}
+    @media print{
+      body{min-width:0;font-size:10.5pt;line-height:1.6}
+      .layout{display:block}aside,.actions,.no-print{display:none}
+      main{padding:0;max-width:none}header{margin-bottom:16px;padding-bottom:18px}
+      h1{font-size:30pt}h2{font-size:19pt}h3{font-size:13pt}.lead{font-size:12pt}
+      section{padding:18px 0}.number{font-size:20pt}
+      h2,h3,h4,.section-heading{break-after:avoid}li,pre,.note,tr,.flow{break-inside:avoid}
+      table{font-size:9.5pt}.flow>div:last-child{background:#fff;color:var(--ink);border-top:3px solid var(--blue)}
+      a{color:var(--ink)}details{break-inside:avoid}details p{display:block}
+      @page{size:A4;margin:17mm}
+    }
+  </style>
+</head>
+<body>
+<div class="layout">
+  <aside>
+    <div class="brand">OpenSelf</div>
+    <p class="edition">中文操作手册<br>桌面本地版 · 2026 年 11 月 7 日</p>
+    <nav aria-label="手册目录">
+      <a href="#first"><span>00</span>第一次：先存一份草稿</a>
+      <a href="#basics"><span>01</span>先认识页面和术语</a>
+      <a href="#key"><span>02</span>配置自己的 API Key</a>
+      <a href="#find"><span>03</span>找到 GitHub 项目</a>
+      <a href="#issue"><span>04</span>写一条 Issue</a>
+      <a href="#review"><span>05</span>审查一份 PR</a>
+      <a href="#publish"><span>06</span>检查草稿并发布</a>
+      <a href="#preferences"><span>07</span>其他设置和贡献雷达</a>
+      <a href="#extension"><span>08</span>浏览器插件（可选）</a>
+      <a href="#startup"><span>09</span>下次怎么打开</a>
+      <a href="#faq"><span>10</span>常见问题</a>
+    </nav>
+    <p class="sidebar-foot">第一次不用全部看完。<br>先做第 00 节，再按需要选择 Issue 或 PR 流程。<br><br>查找关键词：Ctrl + F</p>
+  </aside>
+  <main>
+    <header>
+      <p class="eyebrow">从第一次使用，到确认发布</p>
+      <h1>OpenSelf 操作手册</h1>
+      <p class="lead">用它浏览 GitHub 项目、整理问题、审查代码。你可以自己写，也可以让 AI 帮忙；最后由你确认发布内容。</p>
+      <div class="actions">
+        <a class="button primary" href="http://localhost:3000/zh/dashboard" target="_blank" rel="noopener">打开工作台</a>
+        <a class="button" href="#first">从第一次练习开始</a>
+        <button id="print" type="button">打印 / 另存为 PDF</button>
+      </div>
+      <p class="small">这份手册可以离线阅读。文中的“打开页面”链接需要你电脑上的 OpenSelf 正在运行。</p>
+    </header>
+
+    <div class="note">
+      <p><strong>你当前的使用环境</strong></p>
+      <p>网站在你的电脑本地运行；你的 GitHub 账号 <b>qilin-ljl</b> 已连接，个人 API Key 已保存。其他账号需要填写自己的 Key，费用各自承担。</p>
+      <p>当前为本地版，<b>发布目标不再限制为某个测试仓库</b>。你可以向 GitHub 账号有权限操作的仓库提交 Issue 和 PR 审查，包括别人的公开项目；每次发布仍需在草稿队列确认。</p>
+    </div>
+
+    <section id="first">
+      <div class="section-heading"><span class="number">00</span><h2>第一次：先存一份草稿</h2></div>
+      <p>先熟悉操作，不需要调用 AI，也不需要向 GitHub 发布内容。</p>
+      <ol class="steps">
+        <li>打开 <a href="http://localhost:3000/zh" target="_blank" rel="noopener">OpenSelf 首页</a>。如果尚未登录，点 <span class="tag">用 GitHub 登录</span>，按 GitHub 提示完成授权。<span class="result">成功标志：进入工作台，顶部出现“项目发现”“草稿队列”等入口。</span></li>
+        <li>打开 <a href="http://localhost:3000/zh/r/qilin-ljl/linli-share" target="_blank" rel="noopener">你的测试仓库页面</a>，点 <span class="tag">起草 Issue</span>。</li>
+        <li>在 <span class="tag">Issue 模板</span> 中选择“空白 Issue”（如果提供），填写下面的练习标题和正文。若出现仓库表单，就按表单填写必填项。</li>
+      </ol>
+      <p class="sample-label">练习内容，仅用于你自己的测试仓库；它不是一条真实缺陷报告。</p>
+      <pre>标题：练习：测试 OpenSelf 草稿保存
+
+正文：
+这是一条用于熟悉 OpenSelf 的练习草稿。
+我希望验证：填写内容后，可以在草稿队列中找到它。
+本次练习只保存草稿，暂不发布。</pre>
+      <ol class="steps" start="4">
+        <li>点 <span class="tag">预览</span> 检查内容，再点 <span class="tag">保存草稿</span>。<span class="result">成功标志：出现“草稿已保存”，以及“查看草稿队列”链接。</span></li>
+        <li>点 <span class="tag">查看草稿队列</span>，找到刚才的标题。状态应为 <span class="tag">待确认</span>。</li>
+        <li>展开 <span class="tag">预览</span>；想改文字就点 <span class="tag">编辑</span>，改完再次保存。</li>
+      </ol>
+      <div class="note"><strong>到这里，第一次练习就完成了。</strong><br>这份内容还在 OpenSelf 草稿里。等你确实想发到 GitHub，再按第 06 节操作。</div>
+    </section>
+
+    <section id="basics">
+      <div class="section-heading"><span class="number">01</span><h2>先认识页面和术语</h2></div>
+      <table>
+        <colgroup><col style="width:23%"><col></colgroup>
+        <thead><tr><th>你会看到的词</th><th>它是什么意思</th></tr></thead>
+        <tbody>
+          <tr><td>仓库 / Repo</td><td>GitHub 上的一个项目，通常写作“账号/项目名”。</td></tr>
+          <tr><td>Issue</td><td>给项目提出问题、缺陷报告或功能建议，主要写文字。</td></tr>
+          <tr><td>PR / Pull request</td><td>有人提交的一组代码改动，等待别人检查和合并。</td></tr>
+          <tr><td>Review / 审查</td><td>针对 PR 的代码留下具体意见，以及“发表评论、批准 PR、请求修改”等结论。</td></tr>
+          <tr><td>草稿</td><td>已经保存、等待你检查的内容。草稿本身不会出现在 GitHub。</td></tr>
+          <tr><td>API Key</td><td>让 OpenSelf 调用你的 DeepSeek 账户的密钥。它不是 GitHub 密码。</td></tr>
+        </tbody>
+      </table>
+      <table>
+        <colgroup><col style="width:23%"><col></colgroup>
+        <thead><tr><th>顶部入口</th><th>什么时候用</th></tr></thead>
+        <tbody>
+          <tr><td><a href="http://localhost:3000/zh/dashboard" target="_blank" rel="noopener">工作台</a></td><td>上方“我的仓库”显示当前 GitHub 账号名下的项目，点击直接进入 PR 列表。下方还有“待我审查”“我的 PR”、草稿数量和贡献雷达。</td></tr>
+          <tr><td><a href="http://localhost:3000/zh/search" target="_blank" rel="noopener">项目发现</a></td><td>搜索你感兴趣的项目，然后查看说明、Issues 和 Pull requests。</td></tr>
+          <tr><td><a href="http://localhost:3000/zh/drafts" target="_blank" rel="noopener">草稿队列</a></td><td>预览、编辑、丢弃草稿，或确认向 GitHub 发布。</td></tr>
+          <tr><td><a href="http://localhost:3000/zh/audit" target="_blank" rel="noopener">发布记录</a></td><td>查看已经成功发布的记录，再跳转 GitHub 核对。</td></tr>
+          <tr><td><a href="http://localhost:3000/zh/settings" target="_blank" rel="noopener">账号设置</a></td><td>配置个人 Key、审查风格、学习模式、私有仓库权限等。</td></tr>
+        </tbody>
+      </table>
+    </section>
+
+    <section id="key">
+      <div class="section-heading"><span class="number">02</span><h2>配置自己的 API Key</h2></div>
+      <p>你的账号已经配置好；下面这段可以给以后使用项目的人看。当前版本的个人 Key 输入框用于 <b>DeepSeek API Key</b>。</p>
+      <ol class="steps">
+        <li>在 DeepSeek 官方开放平台获取自己的 API Key。入口可从 <a href="https://api-docs.deepseek.com/zh-cn/" target="_blank" rel="noopener">DeepSeek 官方“首次调用 API”文档</a>进入。</li>
+        <li>登录 OpenSelf，进入 <span class="tag">账号设置</span>，找到 <span class="tag">AI 与审查设置</span>。</li>
+        <li>把 Key 粘贴到 <span class="tag">自己的 DeepSeek API Key</span> 输入框，点它下方的 <span class="tag">保存</span>。</li>
+        <li>看到“已保存，末四位：……”以及“当前使用你自己的 API Key，其他账号无法使用。”就说明已保存。<span class="result">输入框清空是正常现象。保存只确认密钥已存入，是否有效还要以实际 AI 调用结果为准。</span></li>
+      </ol>
+      <p>每个账号只使用自己的 Key。没填、删除或 Key 失效时，不会改用项目所有者的 Key。<b>手动浏览项目、写 Issue 和审查 PR 不需要 AI Key。</b></p>
+      <p>要更换：输入新 Key 后保存。要停止使用：点 <span class="tag">删除 Key</span>。这里删除的是 OpenSelf 保存的副本；如需让该 Key 在所有应用中作废，应到 DeepSeek 平台撤销。</p>
+      <p class="plain-note">Key 加密保存在这个 OpenSelf 实例的服务器中，页面只显示末四位。请在 Key 输入框填写，不要把它写进 Issue、PR 评论或聊天。</p>
+    </section>
+
+    <section id="find">
+      <div class="section-heading"><span class="number">03</span><h2>找到 GitHub 项目</h2></div>
+      <div class="note"><strong>自己的仓库，直接从工作台打开。</strong><br>进入工作台，在“我的仓库”中点击项目卡片上的“查看 PR”，就能看到该仓库的 Pull requests。新建仓库后可点“刷新仓库”；仓库较多时可点“显示更多仓库”。私有仓库需先在账号设置中启用访问权限。</div>
+      <p>要找其他人的项目，再使用下面的项目发现流程：</p>
+      <ol class="steps">
+        <li>点顶部 <span class="tag">项目发现</span>。</li>
+        <li>输入关键词，或直接输入 <code>qilin-ljl/linli-share</code>。输入后稍等，结果会自动出现，无需找“搜索”按钮。</li>
+        <li>点结果中的仓库名称，进入详情页。</li>
+        <li>先看 <span class="tag">概览</span> 里的 README 和贡献指南，再选择 <span class="tag">Issues</span> 或 <span class="tag">Pull requests</span>。</li>
+      </ol>
+      <p>Issues 列表里的标题会打开对应 GitHub 讨论；Pull requests 列表里的标题会进入 OpenSelf 的代码审查页面。列表可切换“开放 / 已关闭”。</p>
+      <p>找不到刚创建的仓库时，可先使用本手册的 <a href="http://localhost:3000/zh/r/qilin-ljl/linli-share" target="_blank" rel="noopener">测试仓库直达链接</a>。</p>
+    </section>
+
+    <section id="issue">
+      <div class="section-heading"><span class="number">04</span><h2>写一条 Issue</h2></div>
+      <p>入口：项目详情页右上方 <span class="tag">起草 Issue</span>。在动笔前，先看一下已有 Issues，避免重复提出同一个问题。</p>
+      <div class="cols">
+        <div><h3>自己写</h3><ol>
+          <li>先选 <b>Issue 模板</b>，再填写。切换模板会重置部分内容。</li>
+          <li>填写标题；正文写清“做了什么、期望什么、实际发生什么”。表单模板按字段填，并完成必填项。</li>
+          <li>点 <b>预览</b> 检查，再点 <b>保存草稿</b>。</li>
+          <li>进入 <b>草稿队列</b> 进行最后检查。</li>
+        </ol></div>
+        <div><h3>让 AI 帮你整理</h3><ol>
+          <li>先确认个人 Key 已保存，并选好 Issue 模板。</li>
+          <li>在 <b>Issue 助手 → 描述你遇到的问题</b> 中填写真实情况。</li>
+          <li>可先点 <b>检查重复 Issue</b>，阅读相关讨论。</li>
+          <li>选择输出语言，点 <b>AI 起草</b>，等待结果。</li>
+          <li>核实内容后点 <b>填入编辑器</b>，再检查必填项并保存草稿。</li>
+        </ol></div>
+      </div>
+      <p class="sample-label">描述问题时可参考这个格式，把内容换成你实际遇到的情况：</p>
+      <pre>使用环境：系统、软件版本、浏览器等。
+复现步骤：第 1 步……第 2 步……
+预期结果：我希望看到什么。
+实际结果：实际看到什么，以及具体报错。
+补充材料：与问题有关的日志或截图说明。</pre>
+      <table>
+        <colgroup><col style="width:24%"><col></colgroup>
+        <thead><tr><th>AI 助手中的按钮</th><th>作用与下一步</th></tr></thead>
+        <tbody>
+          <tr><td>检查重复 Issue</td><td>显示可能相关的讨论。请打开看实际内容；“未找到重复候选”只代表当前搜索范围的结果。</td></tr>
+          <tr><td>AI 起草</td><td>生成建议文字。若出现“还需要补充的信息”，补完后再次起草；AI 结果还没有填入你的最终草稿。</td></tr>
+          <tr><td>填入编辑器</td><td>把 AI 结果放进下方标题、正文或表单，可能替换你原先填写的内容。之后还需要保存草稿。</td></tr>
+          <tr><td>检查质量</td><td>检查当前编辑器中的正文，给出评分和补充建议。只有已有正文时才能使用。</td></tr>
+          <tr><td>翻译草稿</td><td>生成当前正文的译文；检查后点“使用译文”。表单模板的整篇译文不能直接回填，需要按字段处理。</td></tr>
+        </tbody>
+      </table>
+      <p>“跟随仓库语言”用于自动选择起草语言。翻译时如果保留该选项，中文界面会默认译成英文、英文界面默认译成中文；需要确定方向时，直接选“中文”或“英文”。</p>
+      <div class="note"><strong>离开页面前请保存草稿。</strong><br>正在输入的内容并非自动保存；AI 起草、预览、填入编辑器，也都不会直接发布。</div>
+    </section>
+
+    <section id="review">
+      <div class="section-heading"><span class="number">05</span><h2>审查一份 PR</h2></div>
+      <p>自己的项目：工作台 → <span class="tag">我的仓库</span> → 点击仓库 → 点一条 PR，打开审查页后可点“开始预审”。其他项目可以从项目发现进入，再选择 Pull requests。“待我审查”只显示明确邀请你审查的 PR；仓库的 PR 列表不要求这份邀请。</p>
+      <h3>先看懂代码页面</h3>
+      <p>左侧“改动文件”列出这次修改的文件。点文件后，中间显示代码差异。“分栏”是左右对照，“统一”是合在一起显示；“LEFT”指旧代码，“RIGHT”指新代码。</p>
+      <h3>自己写审查意见</h3>
+      <ol class="steps">
+        <li>阅读 PR 说明，查看改动文件和检查结果。检查结果无法访问时，不能据此判断检查已经通过。</li>
+        <li>选中一个文件，点代码行旁的加号；也可在下方填写 <span class="tag">行号</span> 和 <span class="tag">代码版本</span>。</li>
+        <li>在 <span class="tag">审查意见</span> 中说明具体问题、触发条件和影响，点 <span class="tag">添加行内评论</span>。<span class="result">成功标志：页面下方“X 条行内评论”区域出现这条评论。它还没有发布。</span></li>
+        <li>填写 <span class="tag">总评</span>，选择 <span class="tag">审查结论</span>，点 <span class="tag">生成审查草稿</span>。</li>
+        <li>进入草稿队列，按第 06 节检查和发布。</li>
+      </ol>
+      <table>
+        <colgroup><col style="width:24%"><col></colgroup>
+        <thead><tr><th>审查结论</th><th>含义</th></tr></thead>
+        <tbody>
+          <tr><td>发表评论</td><td>提交讨论或建议。第一次练习可以使用这个选项。</td></tr>
+          <tr><td>批准 PR</td><td>向 GitHub 提交“认可这份改动”的审查结论。合并代码仍需在 GitHub 单独操作。</td></tr>
+          <tr><td>请求修改</td><td>说明哪些问题需要修正，再进行后续审查。</td></tr>
+        </tbody>
+      </table>
+      <p>自己创建的 PR 只能选“发表评论”，不能批准自己或向自己请求修改。</p>
+      <h3>让 AI 预审，再由你决定采用哪些意见</h3>
+      <ol class="steps">
+        <li>在 <span class="tag">AI 预审</span> 中选择“安全、性能、可读性、测试”等审查重点，至少保留一项。</li>
+        <li>点 <span class="tag">开始预审</span>，等待分析进度。首次使用先关闭“学习模式”，可以直接看到结果。</li>
+        <li>逐条核对代码：合理的点 <span class="tag">接受</span>，需要改写的点 <span class="tag">编辑意见</span>，不适用的点 <span class="tag">拒绝</span>。</li>
+        <li>点 <span class="tag">将已接受意见加入草稿</span>，把接受或编辑后的意见加入当前审查内容。</li>
+        <li>补充总评和审查结论，再点 <span class="tag">生成审查草稿</span>。<span class="result">要到草稿队列里看到这份草稿，才算完成保存。</span></li>
+      </ol>
+      <div class="note"><strong>AI 的“接受”和审查结论“批准 PR”是两个不同操作。</strong><br>接受只是选中一条建议。最终审查结论和发布内容仍由你决定。AI 没找到问题时，也要查看它深入审查了多少文件、跳过了哪些文件。</div>
+      <p>如果 PR 在你审查期间又有新提交，系统会提示版本已改变。重新打开或刷新 PR、检查最新改动后，再生成草稿。</p>
+    </section>
+
+    <section id="publish">
+      <div class="section-heading"><span class="number">06</span><h2>检查草稿并发布</h2></div>
+      <div class="flow" aria-label="从编辑到发布的四个阶段">
+        <div><b>1. 编辑 / AI 起草</b><span>准备文字和意见</span></div>
+        <div><b>2. 保存 / 生成草稿</b><span>存入 OpenSelf</span></div>
+        <div><b>3. 预览 / 修改</b><span>核对目标与内容</span></div>
+        <div><b>4. 批准并发布</b><span>确认后发往 GitHub</span></div>
+      </div>
+      <ol class="steps">
+        <li>打开 <span class="tag">草稿队列</span>，找到对应草稿，确认仓库名和 PR 编号是否正确。</li>
+        <li>展开 <span class="tag">预览</span>。Issue 检查标题和正文；PR 审查还要检查行内评论、代码版本和审查结论。需要改动就点“编辑”，再保存。</li>
+        <li>确实要发布时，点 <span class="tag">批准并发布</span>，阅读弹窗中的仓库名称并确认。选择“批准 PR”或“请求修改”时，还会再次确认审查结论。</li>
+        <li>等待后台发布，状态变成 <span class="tag">已发布</span> 后，点 <span class="tag">在 GitHub 查看</span> 核对结果。也可以到“发布记录”查找。</li>
+      </ol>
+      <table>
+        <colgroup><col style="width:24%"><col></colgroup>
+        <thead><tr><th>草稿状态</th><th>你可以怎么做</th></tr></thead>
+        <tbody>
+          <tr><td>待确认</td><td>预览、编辑、丢弃，或批准并发布。</td></tr>
+          <tr><td>已批准 / 发布中</td><td>已交给后台处理，等待结果。此时不要重复新建同样内容去发布。</td></tr>
+          <tr><td>已发布</td><td>通过“在 GitHub 查看”核对；OpenSelf 不提供对已发布内容的本地撤回按钮。</td></tr>
+          <tr><td>发布失败</td><td>先读错误提示。普通可修正的错误可编辑后保存，再批准；结果未知的情况按下方说明处理。</td></tr>
+          <tr><td>已丢弃</td><td>这份草稿不再进入发布流程。</td></tr>
+        </tbody>
+      </table>
+      <div class="note"><strong>遇到“发布结果尚未确认”时，先去 GitHub 检查。</strong><br>可能请求已经送达，但结果没有返回。不要立刻新建并重发；先确认有没有重复内容，必要时让维护者核查。</div>
+      <p>本地版不限制指定仓库。GitHub 仍可能因权限、仓库关闭 Issues、归档或其他仓库规则而拒绝操作；私有仓库需先启用访问权限。旧版因测试仓库限制而失败的草稿，可编辑并保存后再确认发布。</p>
+    </section>
+
+    <section id="preferences">
+      <div class="section-heading"><span class="number">07</span><h2>其他设置和贡献雷达</h2></div>
+      <ul>
+        <li><b>审查风格：</b>在设置里写下偏好，例如“优先关注逻辑错误和缺少的测试，意见简洁，给出复现条件”，然后点该区域的“保存”。“重新学习风格”会使用你可访问的历史审查，需有个人 Key。</li>
+        <li><b>学习模式：</b>先隐藏 AI 结果，让你自己记录意见；点“对比我的意见与 AI”后再查看。新手想直接看到 AI 结果，可以先关闭。</li>
+        <li><b>每个 PR 最多显示的意见数：</b>可选 10 或 20。这控制展示数量，不代表已覆盖全部代码问题。</li>
+        <li><b>私有仓库：</b>点“启用私有仓库”后，按 GitHub 提示重新授权。使用私有仓库 AI 时，还需确认将相关内容发送给 DeepSeek。</li>
+        <li><b>使用统计：</b>查看每天预审、起草、发布次数和模型 token 用量；实际费用以你的 DeepSeek 账户为准。</li>
+        <li><b>贡献雷达：</b>在工作台推荐与你常用语言有关的公开入门任务。新账号、没有相关仓库或没有匹配结果时，列表可能为空；它不会自动替你领取任务或发布内容。</li>
+      </ul>
+      <p>平时离开只需退出登录。<b>“撤销 GitHub 授权”会删除本实例保存的 GitHub 令牌、个人 Key 和登录会话</b>，已有草稿仍保留；它不等同于删除全部账号数据。</p>
+    </section>
+
+    <section id="extension">
+      <div class="section-heading"><span class="number">08</span><h2>浏览器插件（可选）</h2></div>
+      <p>先把网页版用熟即可。插件让你在 GitHub 页面旁边打开 OpenSelf 侧边栏，仍需本地网站和后台服务运行，也使用当前账号自己的 Key。</p>
+      <details>
+        <summary>需要插件时，再展开安装步骤</summary>
+        <ol>
+          <li>打开 Chrome 扩展管理页 <code>chrome://extensions</code>，或 Edge 扩展管理页 <code>edge://extensions</code>，开启“开发者模式”。这两个地址请复制到浏览器地址栏。</li>
+          <li>选择“加载已解压的扩展程序”。Chrome 选择下面的 chrome-mv3 文件夹；Edge 选择 edge-mv3 文件夹。</li>
+        </ol>
+        <pre>C:\Users\pc\Desktop\githubpr\apps\extension\.output\chrome-mv3
+C:\Users\pc\Desktop\githubpr\apps\extension\.output\edge-mv3</pre>
+        <ol start="3">
+          <li>复制插件 ID，由维护者填入项目根目录 <code>.env</code> 的 <code>EXTENSION_IDS</code>，多个 ID 用英文逗号分隔，然后重启网站。第一次可把插件 ID 告诉我协助配置；不要发送 API Key。</li>
+          <li>点击插件图标打开侧边栏，点“连接 OpenSelf”，按提示登录。</li>
+          <li>打开 GitHub PR 或新建 Issue 页面，使用侧边栏的预审、草稿和回填功能。</li>
+        </ol>
+      </details>
+      <p>插件里的 <span class="tag">填入 GitHub 页面</span> 只把文字放进 GitHub 输入框；要发布仍需你在 GitHub 点击提交。若无法回填，会尝试复制到剪贴板，让你手动粘贴。</p>
+      <p class="small">当前插件通过本地文件夹安装，尚未发布到扩展商店。默认安装包连接 localhost，只适用于本机测试。</p>
+    </section>
+
+    <section id="startup">
+      <div class="section-heading"><span class="number">09</span><h2>下次怎么打开</h2></div>
+      <div class="note"><strong>推荐：双击本地启动文件。</strong><br>先打开 Docker Desktop，再到 <code>C:\Users\pc\Desktop\githubpr</code> 双击 <code>Start-OpenSelf.cmd</code>。它会启动数据库、网站和后台，也会处理本机普通 PowerShell 找不到 pnpm 的情况。使用时保留窗口；更新后先关闭旧的启动窗口再启动。</div>
+      <p>如果电脑和服务一直开着，直接打开 <a href="http://localhost:3000/zh" target="_blank" rel="noopener">http://localhost:3000/zh</a> 即可。电脑重启后，需要先把服务启动。</p>
+      <details>
+        <summary>电脑重启后的启动步骤</summary>
+        <ol>
+          <li>打开 <b>Docker Desktop</b>，等待它显示引擎已运行。</li>
+          <li>打开 Windows PowerShell，依次粘贴并执行下面三行。最后一行会持续运行，使用网站时保留这个窗口。</li>
+        </ol>
+        <pre>cd C:\Users\pc\Desktop\githubpr
+docker compose up -d
+pnpm dev</pre>
+        <p>看到网站启动提示后，打开 <a href="http://localhost:3000/zh" target="_blank" rel="noopener">OpenSelf 首页</a>。这里的 <code>pnpm dev</code> 会一起启动网页和后台任务。</p>
+        <p>数据库已初始化，不用每次重新安装依赖或重新填写 OAuth。只有项目更新包含数据库变更时，才按维护说明执行迁移。</p>
+      </details>
+      <details>
+        <summary>用完后怎么关</summary>
+        <p>在运行 <code>pnpm dev</code> 的 PowerShell 窗口按 <b>Ctrl + C</b> 可停止网站和后台任务。需要停止数据库时，在项目目录执行 <code>docker compose stop</code>，它会保留数据库内容。</p>
+        <p>如果是我帮你在后台启动的服务，可直接让我停止。不要为了关网站去删除 Docker 数据卷。</p>
+      </details>
+      <div class="note"><strong>把 localhost 链接发给别人，他们不能访问你的这台电脑。</strong><br>localhost 代表访问者自己的电脑。要让其他人直接登录使用，需要把项目部署到可访问的网站地址；他们再登录各自的 GitHub、填写各自的 API Key。</div>
+    </section>
+
+    <section id="faq">
+      <div class="section-heading"><span class="number">10</span><h2>常见问题</h2></div>
+      <details><summary>我不会写代码，也能用吗？</summary><p>可以先用项目浏览和 Issue 功能，把问题讲清楚即可。PR 审查涉及代码，AI 可以协助解释和发现线索；只发布你理解并核实过的意见。</p></details>
+      <details><summary>页面提示“无法访问此网站”</summary><p>先确认 Docker Desktop 正在运行，网站启动窗口没有关闭。按第 09 节重新启动。若提示 3000 端口已被使用，先打开首页检查是否已有服务，不要重复启动很多个窗口。</p></details>
+      <details><summary>PowerShell 提示找不到 docker 或 pnpm</summary><p>优先双击项目根目录的 Start-OpenSelf.cmd，它会寻找常见安装路径以及本机开发工具中的 pnpm。如果启动文件也报错，把错误文字发给我处理，不需要重新申请 GitHub 账号或 API Key。</p></details>
+      <details><summary>我已经登录 GitHub，为什么 OpenSelf 还让我登录？</summary><p>GitHub 网站登录和 OpenSelf 授权是两步。请从 OpenSelf 首页点击“用 GitHub 登录”；成功后会回到本地工作台。若一直显示登录失败，检查本地服务是否启动，并让维护者核对 OAuth 配置。</p></details>
+      <details><summary>点 AI 按钮后提示先配置 Key</summary><p>到“账号设置 → AI 与审查设置”保存当前账号自己的 DeepSeek API Key。别的用户已经配置好，不代表你的账号也配置好了。</p></details>
+      <details><summary>Key 保存了，却提示无效或模型服务不可用</summary><p>“已保存”只表示存入成功。确认使用的是 DeepSeek API Key、复制是否完整、账户是否可用，再重试。模型网络或服务故障也可能导致不可用；不需要反复新建相同任务。</p></details>
+      <details><summary>AI 一直处理，或者草稿一直显示“已批准”</summary><p>先给任务一些处理时间。持续不变化时，确认后台 Worker 正在运行；按第 09 节启动的 <code>pnpm dev</code> 会同时运行它。需要诊断时，在另一个项目终端执行 <code>pnpm worker:ping</code>，成功应显示 <code>ok: true</code>。</p></details>
+      <details><summary>可以向别人的项目提 Issue 或提交审查吗？</summary><p>可以。通过“项目发现”打开对应仓库，准备 Issue 或已有 PR 的审查草稿，再确认发布。当前本地版已移除测试仓库限制，具体操作仍需符合 GitHub 权限和仓库规则。</p></details>
+      <details><summary>能直接修改代码并创建新的 PR 吗？</summary><p>当前 OpenSelf 负责创建 Issue、审查已有 PR 和发布审查意见。修改项目代码、创建分支和发起新的 PR，需要使用 Git、代码编辑器或 GitHub 完成。</p></details>
+      <details><summary>为什么没有“起草 Issue”按钮？</summary><p>先等仓库资料加载完成。仓库已归档或没有开启 Issues 时，不会显示可用的起草入口；可以点“在 GitHub 查看”核对项目状态。</p></details>
+      <details><summary>为什么找不到 PR，或看不到代码差异？</summary><p>先确认项目确实有 PR，并检查“开放 / 已关闭”筛选。没有文本差异可能是二进制文件或内容过大；系统会提示，必要时到 GitHub 查看原始改动。</p></details>
+      <details><summary>我点了“接受”，为什么草稿队列没有东西？</summary><p>接受只选中一条 AI 建议。还需要点“将已接受意见加入草稿”，填写总评和结论，再点“生成审查草稿”。</p></details>
+      <details><summary>发布失败后，怎么再次发布？</summary><p>先读原因。对于普通内容或模板错误，点“编辑”，修正后保存，让状态回到“待确认”，再批准。若提示“发布结果尚未确认”，先到 GitHub 核实，避免重复。</p></details>
+      <details><summary>为什么设置中还看到 platform.aux 等旧记录？</summary><p>这是切换为个人 Key 模式之前保留的历史用量。现在的新 AI 任务只使用当前账号的个人 Key，历史记录不会开启共享 Key。</p></details>
+    </section>
+
+    <footer>
+      <p>适用范围：OpenSelf v0.1 桌面本地版，个人 API Key 模式。页面按钮与当前项目实现对应；不需要先安装浏览器插件，也不需要手机端。</p>
+      <p>项目位置：<code>C:\Users\pc\Desktop\githubpr</code>。想以后再看，直接双击本手册的 HTML 文件；也可以用顶部按钮打印或另存为 PDF。</p>
+    </footer>
+  </main>
+</div>
+<script>
+  document.getElementById('print').addEventListener('click', () => window.print());
+  let openDetails = [];
+  window.addEventListener('beforeprint', () => {
+    openDetails = [...document.querySelectorAll('details')].filter(item => item.open);
+    document.querySelectorAll('details').forEach(item => { item.open = true; });
+  });
+  window.addEventListener('afterprint', () => {
+    document.querySelectorAll('details').forEach(item => { item.open = openDetails.includes(item); });
+  });
+</script>
+</body>
+</html>

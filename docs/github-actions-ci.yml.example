@@ -1,0 +1,56 @@
+name: CI
+on:
+  push:
+  pull_request:
+permissions:
+  contents: read
+jobs:
+  checks:
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_USER: openself
+          POSTGRES_PASSWORD: openself
+          POSTGRES_DB: openself
+        ports: ['5432:5432']
+        options: >-
+          --health-cmd 'pg_isready -U openself'
+          --health-interval 5s --health-timeout 5s --health-retries 10
+      redis:
+        image: redis:7
+        ports: ['6379:6379']
+        options: >-
+          --health-cmd 'redis-cli ping'
+          --health-interval 5s --health-timeout 5s --health-retries 10
+    env:
+      DATABASE_URL: postgres://openself:openself@localhost:5432/openself
+      REDIS_URL: redis://localhost:6379
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm lint
+      - run: pnpm typecheck
+      - run: pnpm test
+      - run: pnpm db:migrate
+      - name: Verify Redis worker round trip
+        shell: bash
+        run: |
+          export APP_URL=http://localhost:3000
+          export GITHUB_CLIENT_ID=ci-test-client
+          export GITHUB_CLIENT_SECRET=ci-test-secret
+          export ENCRYPTION_KEY=$(openssl rand -base64 32)
+          pnpm --filter worker start > /tmp/openself-worker.log 2>&1 &
+          task_worker_pid=$!
+          trap 'kill "$task_worker_pid" 2>/dev/null || true' EXIT
+          pnpm worker:ping
+      - run: pnpm build
+      - run: pnpm --filter extension build:edge
+      - run: pnpm exec playwright install --with-deps chromium
+      - run: pnpm test:e2e

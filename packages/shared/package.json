@@ -1,0 +1,18 @@
+{
+  "name": "@openself/shared",
+  "private": true,
+  "type": "module",
+  "exports": {
+    "./env": "./env.ts",
+    "./api": "./api.ts",
+    "./errors": "./errors.ts",
+    "./ai": "./ai.ts",
+    "./github-url": "./github-url.ts"
+  },
+  "scripts": {
+    "typecheck": "tsc"
+  },
+  "dependencies": {
+    "zod": "latest"
+  }
+}

@@ -1,0 +1,19 @@
+{
+  "name": "@openself/core",
+  "private": true,
+  "type": "module",
+  "exports": {
+    "./*": "./*.ts"
+  },
+  "scripts": {
+    "typecheck": "tsc"
+  },
+  "dependencies": {
+    "@openself/db": "workspace:*",
+    "@openself/github": "workspace:*",
+    "@openself/llm": "workspace:*",
+    "@openself/shared": "workspace:*",
+    "bullmq": "latest",
+    "ioredis": "^6.0.0"
+  }
+}

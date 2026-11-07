@@ -1,0 +1,48 @@
+{
+  "name": "openself",
+  "private": true,
+  "version": "0.0.1",
+  "packageManager": "pnpm@11.25.0",
+  "type": "module",
+  "engines": {
+    "node": ">=22"
+  },
+  "scripts": {
+    "dev": "turbo dev --filter=web --filter=worker",
+    "build": "turbo build",
+    "lint": "eslint . && node scripts/check-i18n.mjs",
+    "typecheck": "turbo typecheck",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "format": "prettier --write .",
+    "db:generate": "pnpm --filter @openself/db generate",
+    "db:migrate": "pnpm --filter @openself/db migrate",
+    "worker:ping": "pnpm --filter worker run ping",
+    "dev:web": "pnpm --filter web dev",
+    "test:e2e": "playwright test",
+    "preview": "pnpm --filter web preview",
+    "setup:env": "node scripts/setup-env.mjs",
+    "extension:build": "pnpm --filter extension build && pnpm --filter extension build:edge",
+    "extension:zip": "pnpm --filter extension zip && pnpm --filter extension zip:edge"
+  },
+  "devDependencies": {
+    "@electric-sql/pglite": "latest",
+    "@eslint/js": "latest",
+    "@playwright/test": "latest",
+    "@types/node": "latest",
+    "@types/react": "latest",
+    "@types/react-dom": "latest",
+    "dotenv": "latest",
+    "drizzle-orm": "^0.45.4",
+    "eslint": "latest",
+    "eslint-config-prettier": "latest",
+    "globals": "latest",
+    "msw": "latest",
+    "prettier": "latest",
+    "tsx": "latest",
+    "turbo": "latest",
+    "typescript": "^6.0.3",
+    "typescript-eslint": "latest",
+    "vitest": "latest"
+  }
+}

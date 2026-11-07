@@ -1,0 +1,21 @@
+{
+  "name": "@openself/llm",
+  "private": true,
+  "type": "module",
+  "exports": {
+    ".": "./index.ts",
+    "./schemas": "./schemas.ts",
+    "./provider": "./provider.ts",
+    "./prompts": "./prompts/index.ts",
+    "./playbooks": "./playbooks.ts"
+  },
+  "scripts": {
+    "typecheck": "tsc",
+    "smoke": "tsx scripts/smoke.ts"
+  },
+  "dependencies": {
+    "@openself/shared": "workspace:*",
+    "openai": "latest",
+    "zod": "latest"
+  }
+}

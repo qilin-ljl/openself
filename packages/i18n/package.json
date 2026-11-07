@@ -1,0 +1,12 @@
+{
+  "name": "@openself/i18n",
+  "private": true,
+  "type": "module",
+  "exports": {
+    "./zh": "./zh.json",
+    "./en": "./en.json"
+  },
+  "scripts": {
+    "typecheck": "tsc"
+  }
+}

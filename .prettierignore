@@ -1,0 +1,7 @@
+pnpm-lock.yaml
+.next
+.turbo
+node_modules
+packages/db/migrations/meta
+.local
+packages/*/test/fixtures

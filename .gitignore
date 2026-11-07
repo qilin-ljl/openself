@@ -1,0 +1,22 @@
+node_modules/
+.next/
+.turbo/
+dist/
+.output/
+.wxt/
+.env*
+!.env.example
+*.tsbuildinfo
+coverage/
+playwright-report/
+test-results/
+*.log
+apps/web/next-env.d.ts
+.local/
+
+# Local development notes are not part of the public release.
+/OPENSELF_PLAN.md
+/PROJECT_PLAN.md
+/findings.md
+/progress.md
+/task_plan.md

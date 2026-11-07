@@ -1,0 +1,24 @@
+{
+  "name": "@openself/db",
+  "private": true,
+  "type": "module",
+  "exports": {
+    ".": "./index.ts",
+    "./schema": "./schema.ts",
+    "./session-store": "./session-store.ts"
+  },
+  "scripts": {
+    "typecheck": "tsc",
+    "generate": "drizzle-kit generate",
+    "migrate": "tsx migrate.ts"
+  },
+  "dependencies": {
+    "@openself/shared": "workspace:*",
+    "drizzle-orm": "latest",
+    "postgres": "latest",
+    "dotenv": "latest"
+  },
+  "devDependencies": {
+    "drizzle-kit": "latest"
+  }
+}

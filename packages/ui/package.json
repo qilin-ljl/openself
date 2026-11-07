@@ -1,0 +1,22 @@
+{
+  "name": "@openself/ui",
+  "private": true,
+  "type": "module",
+  "exports": {
+    "./button": "./button.tsx",
+    "./utils": "./utils.ts"
+  },
+  "scripts": {
+    "typecheck": "tsc"
+  },
+  "dependencies": {
+    "class-variance-authority": "latest",
+    "clsx": "latest",
+    "tailwind-merge": "latest",
+    "@radix-ui/react-slot": "latest"
+  },
+  "peerDependencies": {
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0"
+  }
+}

@@ -1,0 +1,205 @@
+* {
+  box-sizing: border-box;
+}
+body {
+  margin: 0;
+  color: #151518;
+  background: #fff;
+  font:
+    13px/1.6 'Helvetica Neue',
+    Arial,
+    'Microsoft YaHei',
+    sans-serif;
+}
+main {
+  padding: 18px;
+  min-width: 300px;
+}
+header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border-bottom: 1px solid #e4e4e8;
+  padding-bottom: 16px;
+}
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  font-size: 20px;
+}
+.brand svg {
+  color: #002fa7;
+}
+button {
+  font: inherit;
+  cursor: pointer;
+}
+button:disabled {
+  opacity: 0.5;
+  cursor: default;
+}
+button:focus-visible,
+a:focus-visible {
+  outline: 2px solid #002fa7;
+  outline-offset: 3px;
+}
+.language,
+.account button {
+  border: 0;
+  background: none;
+  color: #666;
+}
+section {
+  padding: 18px 0;
+}
+section > p {
+  color: #666;
+}
+h2 {
+  font-size: 16px;
+  overflow-wrap: anywhere;
+  margin: 0 0 18px;
+}
+h3 {
+  font-size: 14px;
+}
+label {
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+  margin: 14px 0;
+}
+input:not([type='checkbox']),
+textarea,
+select {
+  width: 100%;
+  padding: 10px;
+  border: 1px solid #ddd;
+  border-radius: 0;
+  font: inherit;
+  background: #fff;
+}
+textarea {
+  resize: vertical;
+  min-height: 115px;
+}
+input[type='checkbox'] {
+  accent-color: #002fa7;
+}
+.button {
+  display: inline-flex;
+  justify-content: center;
+  align-items: center;
+  gap: 7px;
+  padding: 9px 12px;
+  border: 1px solid transparent;
+  font:
+    600 12px/1.4 Arial,
+    sans-serif;
+  text-decoration: none;
+  min-height: 36px;
+}
+.button-primary {
+  background: #002fa7;
+  color: white;
+}
+.button-outline {
+  background: white;
+  border-color: #ddd;
+  color: #151518;
+}
+.button-ghost {
+  background: none;
+  color: #666;
+}
+.actions {
+  display: flex;
+  gap: 7px;
+  flex-wrap: wrap;
+  margin: 14px 0;
+}
+.playbooks {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 2px 16px;
+}
+.playbooks label {
+  flex-direction: row;
+  align-items: center;
+  font-size: 12px;
+  margin: 5px 0;
+}
+code {
+  display: block;
+  overflow-wrap: anywhere;
+  padding: 12px;
+  background: #f7f7f8;
+  font-size: 11px;
+  margin: 15px 0;
+}
+.account {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 11px;
+  margin-top: 14px;
+}
+.finding {
+  border: 1px solid #e4e4e8;
+  border-left: 3px solid #002fa7;
+  padding: 12px;
+  margin: 16px 0;
+}
+.finding strong {
+  display: block;
+  font-size: 14px;
+}
+.finding p {
+  white-space: pre-wrap;
+}
+.path-link {
+  display: block;
+  border: 0;
+  background: none;
+  color: #002fa7;
+  font-size: 11px;
+  padding: 0;
+  margin-bottom: 10px;
+  word-break: break-all;
+  text-align: left;
+}
+.error {
+  color: #a82b35;
+}
+.risk-list {
+  display: flex;
+  flex-direction: column;
+  font-size: 11px;
+  color: #666;
+  max-height: 150px;
+  overflow: auto;
+}
+a {
+  color: #002fa7;
+  text-decoration: none;
+}
+section > a {
+  display: block;
+  margin-top: 20px;
+}
+footer {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  border-top: 1px solid #ddd;
+  padding-top: 16px;
+  font-size: 11px;
+}
+progress {
+  width: 100%;
+  accent-color: #002fa7;
+}
+small {
+  color: #666;
+}

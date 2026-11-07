@@ -1,0 +1,27 @@
+{
+  "name": "extension",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "scripts": {
+    "dev": "wxt",
+    "build": "wxt build",
+    "build:edge": "wxt build -b edge",
+    "zip": "wxt zip",
+    "zip:edge": "wxt zip -b edge",
+    "typecheck": "wxt prepare && tsc --noEmit"
+  },
+  "dependencies": {
+    "@openself/shared": "workspace:*",
+    "@openself/i18n": "workspace:*",
+    "@openself/ui": "workspace:*",
+    "react": "latest",
+    "react-dom": "latest",
+    "lucide-react": "latest"
+  },
+  "devDependencies": {
+    "wxt": "latest",
+    "@wxt-dev/module-react": "latest",
+    "@types/chrome": "latest"
+  }
+}
