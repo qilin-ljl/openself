@@ -25,6 +25,7 @@ export default async function AppLayout({
           <Link href="/dashboard">{t('dashboard')}</Link>
           <Link href="/search">{w('navSearch')}</Link>
           <Link href="/contribute">{w('navContribute')}</Link>
+          <Link href="/tasks">{w('navTasks')}</Link>
           <Link href="/drafts">{w('navDrafts')}</Link>
           <Link href="/audit">{w('navAudit')}</Link>
           <Link href="/settings">{(await getTranslations('settings'))('title')}</Link>

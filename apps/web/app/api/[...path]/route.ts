@@ -39,8 +39,6 @@ async function route(request: NextRequest, { params }: { params: Promise<{ path:
       if (path.length === 4 && path[2] === 'findings' && method === 'PATCH')
         return ai.editFinding(user, id, z.uuid().parse(path[3]), await body(request));
     }
-    if (path[0] === 'jobs' && path.length === 2 && method === 'GET')
-      return getAI().getJob(user.id, z.uuid().parse(path[1]));
     if (
       path[0] === 'issues' &&
       path.length === 2 &&

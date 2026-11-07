@@ -5,6 +5,7 @@ import { Button } from '@openself/ui/button';
 import type { GitHubClient } from '@openself/github';
 import type { FormAnswers } from '@openself/github/templates';
 import { buildFormBody } from '@openself/github/templates';
+import type { JobDTO } from '@openself/shared/ai';
 import type { DraftDTO, IssuePayload } from '@openself/shared/api';
 import { Link } from '../i18n/navigation';
 import { api, ErrorNotice, Loading, RequestError, useResource } from './data';
@@ -16,15 +17,18 @@ export function IssueEditor({
   onSaved,
   scanJobId,
   findingId,
+  assistantJobId,
 }: {
   repoFullName: string;
   initial?: DraftDTO;
   onSaved?: () => void;
   scanJobId?: string;
   findingId?: string;
+  assistantJobId?: string;
 }) {
   const t = useTranslations('workspace'),
     locale = useLocale();
+  const restoredTask = useResource<JobDTO>(assistantJobId ? '/api/jobs/' + assistantJobId : null);
   const original = initial?.payloadJson as IssuePayload | undefined;
   const context = useResource<{ repo: string; title: string; description: string }>(
     scanJobId && findingId
@@ -55,6 +59,10 @@ export function IssueEditor({
       setBody(template.body ?? '');
     }
   }, [resource.data, initial]);
+  useEffect(() => {
+    const input = restoredTask.data?.input as { repo?: string; templateId?: string } | undefined;
+    if (input?.repo === repoFullName && resource.data) setSelected(input.templateId ?? '');
+  }, [restoredTask.data, resource.data, repoFullName]);
   const template = resource.data?.templates.find((item) => item.id === selected);
   function choose(id: string) {
     const template = resource.data?.templates.find((item) => item.id === id);
@@ -101,6 +109,7 @@ export function IssueEditor({
     <>
       <ErrorNotice code={context.error} retry={context.reload} />
       <IssueAssistant
+        initialJobId={assistantJobId}
         initialDescription={
           context.data?.repo === repoFullName.toLowerCase() ? context.data.description : undefined
         }

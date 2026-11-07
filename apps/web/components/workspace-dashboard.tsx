@@ -7,6 +7,7 @@ import { Link } from '../i18n/navigation';
 import { ErrorNotice, Loading, useResource } from './data';
 import { Radar } from './radar';
 import { OwnedRepositories } from './owned-repositories';
+import { TaskHistory } from './task-history';
 type Item = Awaited<ReturnType<GitHubClient['searchIssues']>>['items'][number];
 export function WorkspaceDashboard({ login }: { login: string }) {
   const t = useTranslations('workspace');
@@ -27,6 +28,7 @@ export function WorkspaceDashboard({ login }: { login: string }) {
         </Button>
       </div>
       <OwnedRepositories />
+      <TaskHistory compact />
       <ErrorNotice code={r.error} retry={r.reload} />
       {r.loading && <Loading />}
       {r.data && (

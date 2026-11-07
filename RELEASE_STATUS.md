@@ -1,6 +1,16 @@
-# OpenSelf v0.2 release status
+# OpenSelf v0.3 release status
 
 Updated: 2026-11-07.
+
+## v0.3 implementation and verification
+
+The v0.3 implementation adds model-default output budgets (no max_tokens parameter), project-aware inspection plans, selectable scopes and fast/deep modes, declaration-based source excerpts, proposal-specific context, two concurrent scan batches, persisted per-batch checkpoints/cache, job history, cancellation/resume and active-job deduplication. Issue drafting defaults to fast mode. PR review/approval/merge distinctions are clarified; merging remains on GitHub.
+
+At the user's explicit request, automated tests, browser tests and live AI calls were NOT run for v0.3. Workspace type checking, lint and production build pass. A user-reported task-list 404 was diagnosed with a narrowly scoped authenticated read: after introducing dedicated job routes, the API returned HTTP 200 with 20 existing records. No AI task was submitted during that diagnosis; the temporary diagnostic session was revoked. The historical 147-test and browser/live results below belong to v0.2 and are not v0.3 acceptance evidence. Existing v0.2 test fixtures may need adaptation to the new planning stage and defaults. Source selection uses bounded manifests, sampled symbol outlines and heuristic direct-import relationships; it does not build a complete semantic dependency graph. Cache reuse is scoped to the same user and pinned commit, not arbitrary changed commits.
+
+## Historical v0.2 verification
+
+
 
 The current delivery target is the local edition. It does not require public hosting and has no test-repository publication restriction. Cloud deployment and store submission are optional future work; verification limits are recorded below.
 
@@ -41,7 +51,7 @@ Repository scans are public-only and read a pinned default-branch commit. The de
 
 If deep-model output remains invalid after its format retry, only that batch is retried with the fast model. If validation still fails, its files are explicitly marked as incomplete and excluded from analyzed coverage; valid results from other batches are retained. An incomplete report is not a clean scan, including when every batch fails. Credential failures still surface as errors.
 
-A live diagnostic observed an empty answer with `finish_reason: length` and 8,000 completion tokens. Deep scan calls now allow up to 16,000 output tokens, matching the provider's default deep budget; this raises the possible per-call usage and does not guarantee every response will validate. The exact malformed response from the older failed task was not retained.
+A live diagnostic observed an empty answer with `finish_reason: length` and 8,000 completion tokens. In v0.2, deep scan calls were changed to allow up to 16,000 output tokens, matching the provider's default deep budget; this raises the possible per-call usage and does not guarantee every response will validate. The exact malformed response from the older failed task was not retained.
 
 Publication rechecks repository ID, default branch, base commit and file identities. It creates a separate branch, using the viewer's fork when upstream is not writable, and defaults to a draft PR. There is no automatic merge. A confirmed intermediate write followed by failure is marked uncertain and cannot be blindly republished; the user may need to inspect a created fork/branch on GitHub. Real external fork/PR creation for this new flow has not been exercised; its write behavior is verified using isolated GitHub fixtures.
 

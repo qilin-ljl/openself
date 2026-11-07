@@ -272,3 +272,81 @@
   color: var(--muted);
   margin-top: 8px;
 }
+.job-progress {
+  margin: 20px 0;
+  padding: 18px 20px;
+  border: 1px solid var(--line, #e4e4e8);
+  background: var(--surface, #f7f7f8);
+}
+.job-progress progress {
+  width: 100%;
+  height: 8px;
+  accent-color: #002fa7;
+}
+.job-progress p {
+  overflow-wrap: anywhere;
+}
+.task-history {
+  margin: 32px 0;
+}
+.task-card {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 12px 24px;
+  padding: 20px 0;
+  border-top: 1px solid var(--line, #e4e4e8);
+}
+.task-card a {
+  overflow-wrap: anywhere;
+}
+.task-card .inline-actions {
+  justify-content: flex-end;
+}
+.task-card p {
+  margin: 6px 0;
+}
+.task-status {
+  font-size: 13px;
+  color: #002fa7;
+}
+.status-failed,
+.status-cancelled {
+  color: #8b3939;
+}
+.scan-plan {
+  border-top: 2px solid #002fa7;
+  margin-top: 24px;
+  padding-top: 20px;
+}
+.plan-files {
+  max-height: 420px;
+  overflow: auto;
+  border: 1px solid var(--line, #e4e4e8);
+  margin: 16px 0;
+}
+.plan-file {
+  display: grid;
+  grid-template-columns: 20px minmax(0, 1fr);
+  gap: 12px;
+  padding: 14px 16px;
+  border-bottom: 1px solid var(--line, #e4e4e8);
+  cursor: pointer;
+}
+.plan-file input {
+  width: 16px;
+  height: 16px;
+  margin: 3px 0;
+}
+.plan-file small {
+  display: block;
+  color: var(--muted, #66666f);
+  margin-top: 6px;
+}
+.plan-file strong {
+  overflow-wrap: anywhere;
+}
+.task-result {
+  margin-top: 24px;
+  padding-top: 20px;
+  border-top: 1px solid var(--line, #e4e4e8);
+}

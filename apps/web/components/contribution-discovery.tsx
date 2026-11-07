@@ -8,6 +8,7 @@ import { parseGitHubUrl } from '@openself/shared/github-url';
 import { Link, useRouter } from '../i18n/navigation';
 import { api, ErrorNotice, RequestError } from './data';
 import { useAIJob } from './use-ai-job';
+import { JobProgress } from './job-progress';
 
 export function ContributionDiscovery({ initialJobId }: { initialJobId?: string }) {
   const t = useTranslations('contribute'),
@@ -86,6 +87,7 @@ export function ContributionDiscovery({ initialJobId }: { initialJobId?: string 
           retry={task.error ? task.reload : undefined}
         />
         {pending && <p role="status">{t('discoveryPending')}</p>}
+        <JobProgress job={task.data} jobId={job} />
       </section>
       <section className="direct-scan">
         <div>

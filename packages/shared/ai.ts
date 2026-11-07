@@ -99,6 +99,7 @@ export const StartReview = z.object({
   lang: z.enum(['zh', 'en']).optional(),
 });
 export const IssueAIInput = z.object({
+  mode: z.enum(['fast', 'deep']).default('fast'),
   repo: z.string().regex(/^[\w.-]+\/[\w.-]+$/),
   text: z.string().trim().min(1).max(20000),
   templateId: z.string().optional(),
@@ -127,7 +128,25 @@ export type ReviewDTO = {
 export type JobDTO = {
   id: string;
   kind: string;
-  status: 'queued' | 'running' | 'done' | 'failed';
+  status: 'queued' | 'running' | 'done' | 'failed' | 'cancelled';
   resultJson: unknown;
   error: string | null;
+  input?: unknown;
+  createdAt?: string;
+  updatedAt?: string;
+  attempts?: number;
+};
+export type JobProgress = {
+  stage: string;
+  completed?: number;
+  total?: number;
+  current?: string;
+  cached?: number;
+};
+export type JobListItem = Omit<JobDTO, 'input' | 'resultJson'> & {
+  repo: string | null;
+  href: string;
+  progress?: JobProgress;
+  durationMs?: number;
+  incomplete?: boolean;
 };

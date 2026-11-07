@@ -43,8 +43,15 @@ export function useResource<T>(url: string | null, poll = 0) {
     const controller = new AbortController();
     const timer = setInterval(() => {
       api<T>(url, { signal: controller.signal })
-        .then(setData)
-        .catch(() => {});
+        .then((value) => {
+          if (controller.signal.aborted) return;
+          setData(value);
+          setError(undefined);
+          setLoading(false);
+        })
+        .catch((e) => {
+          if (!controller.signal.aborted) setError(e instanceof RequestError ? e.code : 'unknown');
+        });
     }, poll);
     return () => {
       controller.abort();

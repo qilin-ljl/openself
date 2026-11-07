@@ -5,7 +5,7 @@ export default async function Page({
   searchParams,
 }: {
   params: Promise<{ owner: string; repo: string }>;
-  searchParams: Promise<{ scan?: string; finding?: string }>;
+  searchParams: Promise<{ scan?: string; finding?: string; job?: string }>;
 }) {
   const { owner, repo } = await params;
   const query = await searchParams;
@@ -20,6 +20,7 @@ export default async function Page({
         </div>
       </div>
       <IssueEditor
+        assistantJobId={typeof query.job === 'string' ? query.job : undefined}
         repoFullName={owner + '/' + repo}
         scanJobId={typeof query.scan === 'string' ? query.scan : undefined}
         findingId={typeof query.finding === 'string' ? query.finding : undefined}

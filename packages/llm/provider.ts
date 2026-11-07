@@ -39,7 +39,6 @@ export function createDeepSeekProvider(options: {
                   { role: 'user', content: opts.user + correction },
                 ],
                 response_format: { type: 'json_object' },
-                max_tokens: opts.maxTokens ?? (opts.tier === 'deep' ? 16000 : 4000),
                 thinking: { type: thinking ? 'enabled' : 'disabled' },
                 ...(thinking ? { reasoning_effort: 'high' } : {}),
               } as OpenAI.Chat.Completions.ChatCompletionCreateParamsNonStreaming,

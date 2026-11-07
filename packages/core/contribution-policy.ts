@@ -50,7 +50,9 @@ export function sourceSkipReason(
     return 'generated';
   if (
     !supported.test(entry.path) &&
-    !/(?:^|\/)(?:Dockerfile|Makefile|CMakeLists\.txt)$/.test(entry.path)
+    !/(?:^|\/)(?:Dockerfile|Makefile|CMakeLists\.txt|go\.mod|requirements(?:-[\w-]+)?\.txt|Pipfile)$/.test(
+      entry.path,
+    )
   )
     return 'unsupported';
   if (body !== undefined && (body.includes('\0') || secretPattern.test(body)))

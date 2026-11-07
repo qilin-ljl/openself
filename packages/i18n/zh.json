@@ -6,7 +6,7 @@
     "dashboard": "工作台",
     "logout": "退出登录",
     "back": "返回首页",
-    "version": "v0.2 · 本地版"
+    "version": "v0.3 · 本地版"
   },
   "landing": {
     "eyebrow": "你的 GitHub AI 分身",
@@ -209,7 +209,10 @@
       "fork_conflict": "无法使用当前同名仓库作为 Fork，请先在 GitHub 检查。",
       "fork_not_ready": "Fork 尚未就绪，请先到 GitHub 核对状态。",
       "contribution_branch_exists": "目标贡献分支已存在，请到 GitHub 检查，避免覆盖已有内容。",
-      "contribution_branch_changed": "贡献分支已有其他改动，发布已停止，请到 GitHub 检查。"
+      "contribution_branch_changed": "贡献分支已有其他改动，发布已停止，请到 GitHub 检查。",
+      "job_cancelled": "任务已取消。已完成的分析已保留，可从任务记录继续。",
+      "job_already_done": "任务已经完成，请直接查看结果。",
+      "scan_plan_empty": "AI 未选出有效检查文件，请调整目标后重新生成计划。"
     },
     "status": {
       "draft": "待确认",
@@ -257,7 +260,11 @@
     "closedPull": "这个 PR 已关闭。请在 GitHub 确认其状态后再审查。",
     "navContribute": "AI 贡献",
     "scanRepository": "AI 体检",
-    "ideaSearch": "用想法找项目"
+    "ideaSearch": "用想法找项目",
+    "navTasks": "AI 任务",
+    "reviewVsMerge": "AI 审查用于分析代码；批准审查只是提交认可意见；合并才会把代码加入目标分支。本页不会合并代码，可通过右上角入口到 GitHub 操作。",
+    "ownPRExplanation": "这是你本人创建的 PR。仍可用 AI 审查并发表评论，但 GitHub 不允许作者批准自己的 PR；仓库归你所有并不影响你批准别人提交的 PR。",
+    "draftPRExplanation": "这份 PR 还是草稿。需要在 GitHub 标记 Ready for review，满足仓库要求后才能合并。"
   },
   "ai": {
     "title": "AI 预审",
@@ -392,11 +399,11 @@
     "viewProject": "查看项目",
     "starCount": "{count} 个 Star",
     "scanTitle": "仓库体检",
-    "scanDescription": "只读公开源码，寻找有代码依据的候选问题和改进点；不会执行仓库代码。",
+    "scanDescription": "先理解项目结构和目标，再有选择地检查源码及文档，寻找有依据的问题和改进机会。",
     "scanGoal": "关注的方向（可选）",
     "fileBudget": "最多读取文件数",
     "startScan": "开始体检",
-    "scanBudgetNote": "每个文件最多分析开头 400 行、16,000 字符，总计最多 160,000 字符；跳过依赖、生成文件和受保护内容。结果会列出实际覆盖范围。",
+    "scanBudgetNote": "按计划优先读取完整声明块，并按需补充直接依赖；大块超出预算时明确标记截取范围。每文件最多 16,000 字符，总计最多 160,000 字符。最多两批并行，不执行目标代码。",
     "scanPending": "正在固定提交版本、读取源码并分析候选问题…",
     "scanResults": "体检结果",
     "coverage": "已分析 {count} / {eligible} 个符合读取条件的文件，跳过 {skipped} 项。",
@@ -408,7 +415,7 @@
     "partialFile": "只检查部分内容",
     "changeInstruction": "补充改动要求（可选）",
     "noFindings": "当前检查范围内没有得到可核实的候选问题，不代表整个仓库不存在问题。",
-    "analysisIncomplete": "本次报告不完整：{count} 个文件的 AI 输出未通过校验，未计入已分析范围。其他有效结果已保留；不能据此认定这些文件没有问题。",
+    "analysisIncomplete": "本次报告不完整：{count} 个文件的 AI 分析未完成，其他有效结果已保留。可在任务详情中只重试未完成部分。",
     "verificationPlan": "建议验证步骤（未执行）",
     "prepareCode": "准备代码改动",
     "draftIssue": "用此发现起草 Issue",
@@ -443,8 +450,98 @@
       "empty": "空文件",
       "scan_budget": "达到本次读取上限",
       "finding_budget": "达到候选结果上限",
-      "analysis_failed": "AI 输出校验失败，未完成分析",
-      "other": "未能读取或未纳入本次分析"
+      "analysis_failed": "AI 分析失败，未计入已完成范围",
+      "other": "未能读取或未纳入本次分析",
+      "outside_plan": "本次计划未覆盖",
+      "context_only": "已作为项目资料参考，未单独分析"
+    },
+    "mode": "分析模式",
+    "fast": "快速模式（默认）",
+    "deep": "深度分析（较慢）",
+    "focus": "寻找什么",
+    "both": "问题与改进建议",
+    "bugs": "代码问题",
+    "opportunities": "功能、体验、文档与测试改进",
+    "planFirst": "先理解项目并生成检查计划，调整文件后再开始。默认快速模式，每批结果都会保存。",
+    "makePlan": "生成检查计划",
+    "planTitle": "项目理解与检查计划",
+    "startSelected": "检查所选文件",
+    "selectedCount": "已选 {count} 个文件，上限 {max} 个；未用完的名额可补充直接依赖文件。",
+    "extraPaths": "补充文件路径（每行一个，必须存在于仓库）",
+    "extraPathsHint": "例如：src/main.ts",
+    "liveReport": "这是已保存的阶段性报告，任务尚未完整结束。完成后可从候选继续起草或生成代码；取消或失败时仍保留已完成部分。",
+    "reused": "已复用 {count} 批相同版本、范围和模式的分析结果。",
+    "discussionOnly": "待讨论的改进建议，不是已证实的缺陷。",
+    "audience": "适用场景",
+    "benefit": "预期收益",
+    "tradeoffs": "代价与不确定性",
+    "deepen": "深入分析此文件",
+    "issueFastNote": "默认快速整理已有描述和代码证据；需要进一步论证时可选择深度模式。结果可从 AI 任务中找回。",
+    "contextDocs": "参考资料：{paths}"
+  },
+  "tasks": {
+    "title": "AI 任务",
+    "recent": "最近 AI 任务",
+    "description": "查看进度、找回结果、取消后续处理或从已保存的结果继续。",
+    "details": "任务详情",
+    "viewAll": "查看全部任务",
+    "loading": "读取任务…",
+    "empty": "还没有 AI 任务。",
+    "cancel": "取消后续处理",
+    "retry": "继续 / 重试",
+    "retryFailed": "重试未完成部分",
+    "incomplete": "报告不完整",
+    "seconds": "已处理 {count} 秒",
+    "cached": "复用 {count} 批",
+    "openResult": "打开任务页面 / 结果",
+    "leaveNote": "可以离开页面，任务会继续。到工作台或 AI 任务入口可找回；重复提交相同运行中任务会复用任务。",
+    "resumeNote": "已完成批次会保留。取消会停止后续处理，并尽力中止正在等待的模型请求；已发生的模型用量仍计费。继续扫描会复用同版本的有效批次。",
+    "status": {
+      "queued": "排队中",
+      "running": "处理中",
+      "done": "已完成",
+      "failed": "失败，可重试",
+      "cancelled": "已取消"
+    },
+    "stage": {
+      "starting": "准备任务",
+      "planning": "理解项目并选择模块",
+      "context": "读取项目资料与模板",
+      "reading": "读取源码和关联文件",
+      "analyzing": "分批分析",
+      "drafting": "整理 Issue 草稿",
+      "generating": "生成代码改动",
+      "discovering": "搜索项目并分析匹配",
+      "reviewing": "审查 PR",
+      "done": "处理结束"
+    },
+    "kind": {
+      "discovery": {
+        "find": "想法找项目"
+      },
+      "repository": {
+        "plan": "生成检查计划",
+        "scan": "仓库体检"
+      },
+      "change": {
+        "prepare": "生成代码改动"
+      },
+      "issue": {
+        "draft": "Issue 起草",
+        "check": "Issue 查重",
+        "quality": "Issue 质量检查"
+      },
+      "review": {
+        "run": "PR 审查"
+      },
+      "rulecard": {
+        "build": "项目规范"
+      },
+      "style": {
+        "build": "审查风格"
+      },
+      "translate": "翻译",
+      "other": "AI 处理"
     }
   }
 }

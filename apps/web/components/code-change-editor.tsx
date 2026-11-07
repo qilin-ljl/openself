@@ -8,6 +8,7 @@ import { Link } from '../i18n/navigation';
 import { CodeChanges } from './code-changes';
 import { api, ErrorNotice, RequestError } from './data';
 import { useAIJob } from './use-ai-job';
+import { JobProgress } from './job-progress';
 export function CodeChangeEditor({ jobId }: { jobId: string }) {
   const t = useTranslations('contribute'),
     w = useTranslations('workspace');
@@ -59,6 +60,7 @@ export function CodeChangeEditor({ jobId }: { jobId: string }) {
         code={error ?? task.error ?? task.data?.error ?? undefined}
         retry={task.error ? task.reload : undefined}
       />
+      <JobProgress job={task.data} jobId={jobId} />
       {(!task.data || ['queued', 'running'].includes(task.data.status)) && (
         <p role="status">{t('codePending')}</p>
       )}

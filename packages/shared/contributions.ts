@@ -41,7 +41,31 @@ export const RepositoryScanInput = z.object({
   repo,
   goal: z.string().trim().max(4000).default(''),
   maxFiles: z.number().int().min(1).max(100).default(20),
+  mode: z.enum(['fast', 'deep']).default('fast'),
+  focus: z.enum(['both', 'bugs', 'opportunities']).default('both'),
+  planJobId: z.uuid().optional(),
+  selectedPaths: z.array(z.string().min(1).max(400)).max(100).optional(),
 });
+export const RepositoryPlan = z.object({
+  repo,
+  repoId: z.number().int().positive(),
+  baseBranch: z.string(),
+  baseSha: sha,
+  goal: z.string(),
+  summary: z.string(),
+  treeTruncated: z.boolean(),
+  modules: z.array(z.object({ name: z.string(), purpose: z.string(), paths: z.array(z.string()) })),
+  files: z.array(
+    z.object({
+      path: z.string(),
+      reason: z.string(),
+      role: z.string(),
+      focusLines: z.array(z.number().int().positive()).default([]),
+    }),
+  ),
+  documents: z.array(z.string()).default([]),
+});
+export type RepositoryPlan = z.infer<typeof RepositoryPlan>;
 export const ScanFindingInput = z.object({
   path: z.string().min(1).max(400),
   line: z.number().int().positive(),
@@ -53,6 +77,10 @@ export const ScanFindingInput = z.object({
   verification: z.array(z.string().max(1000)).max(5),
   confidence: z.number().min(0).max(1),
   relatedIssues: z.array(z.number().int().positive()).max(5).default([]),
+  audience: z.string().max(2000).default(''),
+  benefit: z.string().max(2000).default(''),
+  tradeoffs: z.string().max(2000).default(''),
+  discussionOnly: z.boolean().default(false),
 });
 export const ScanBatch = z.object({ findings: z.array(ScanFindingInput).max(12) });
 export const ScanFinding = ScanFindingInput.extend({ id: z.uuid(), sourceUrl: z.url() });
@@ -75,6 +103,11 @@ export const RepositoryScanResult = z.object({
   findings: z.array(ScanFinding),
   invalidFindings: z.number(),
   relatedIssues: z.array(z.object({ number: z.number(), title: z.string(), url: z.url() })),
+  mode: z.enum(['fast', 'deep']).default('fast'),
+  focus: z.enum(['both', 'bugs', 'opportunities']).default('both'),
+  reusedBatches: z.number().default(0),
+  plan: RepositoryPlan.optional(),
+  ranges: z.array(z.object({ path: z.string(), start: z.number(), end: z.number() })).default([]),
 });
 export const PrepareChangeInput = z.object({
   scanJobId: z.uuid(),

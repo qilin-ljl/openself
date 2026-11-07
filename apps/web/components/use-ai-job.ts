@@ -9,7 +9,8 @@ export function useAIJob(jobId?: string) {
     jobId && finished !== jobId ? 2000 : 0,
   );
   useEffect(() => {
-    if (jobId && task.data?.id === jobId && task.data.status === 'done') setFinished(jobId);
+    if (jobId && task.data?.id === jobId)
+      setFinished(['done', 'cancelled'].includes(task.data.status) ? jobId : undefined);
   }, [jobId, task.data]);
-  return task;
+  return { ...task, data: task.data?.id === jobId ? task.data : undefined };
 }

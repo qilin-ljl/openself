@@ -6,7 +6,7 @@
     "dashboard": "Dashboard",
     "logout": "Sign out",
     "back": "Back to home",
-    "version": "v0.2 · Local edition"
+    "version": "v0.3 · Local edition"
   },
   "landing": {
     "eyebrow": "Your AI counterpart on GitHub",
@@ -209,7 +209,10 @@
       "fork_conflict": "The existing repository cannot be used as the required fork. Check it on GitHub.",
       "fork_not_ready": "The fork is not ready. Check its state on GitHub.",
       "contribution_branch_exists": "The contribution branch already exists. Check GitHub before continuing.",
-      "contribution_branch_changed": "The contribution branch changed. Publication stopped; check GitHub."
+      "contribution_branch_changed": "The contribution branch changed. Publication stopped; check GitHub.",
+      "job_cancelled": "Task cancelled. Saved analysis can be resumed from task history.",
+      "job_already_done": "Task already completed. Open its result.",
+      "scan_plan_empty": "No valid files were selected. Adjust the goal and generate another plan."
     },
     "status": {
       "draft": "Draft",
@@ -257,7 +260,11 @@
     "closedPull": "This PR is closed. Check its status on GitHub before reviewing.",
     "navContribute": "AI contributions",
     "scanRepository": "AI source scan",
-    "ideaSearch": "Find by idea"
+    "ideaSearch": "Find by idea",
+    "navTasks": "AI tasks",
+    "reviewVsMerge": "AI review analyzes changes. Approval submits a review decision; merging integrates code into the target branch. This page does not merge code. Open GitHub to manage merging.",
+    "ownPRExplanation": "You authored this PR. AI analysis and comments are available, but GitHub does not allow self-approval. You can approve another author’s PR in your repository.",
+    "draftPRExplanation": "This PR is a draft. Mark it Ready for review on GitHub before merging, subject to repository requirements."
   },
   "ai": {
     "title": "AI pre-review",
@@ -392,11 +399,11 @@
     "viewProject": "View repository",
     "starCount": "{count} stars",
     "scanTitle": "Repository source scan",
-    "scanDescription": "Read public source to identify evidence-backed candidates and improvements. Repository code is not executed.",
+    "scanDescription": "Understand project structure and goals, then inspect selected source and docs for grounded problems and contribution opportunities.",
     "scanGoal": "Focus area (optional)",
     "fileBudget": "Maximum files",
     "startScan": "Start scan",
-    "scanBudgetNote": "Examines up to the first 400 lines and 16,000 characters per file, with a 160,000-character total budget. Dependencies, generated files and protected content are skipped. Actual coverage is reported.",
+    "scanBudgetNote": "Prioritizes complete declaration blocks and direct dependencies. Oversized blocks have explicit partial ranges. Up to 16,000 characters per file and 160,000 total; at most two batches run concurrently. Target code is not executed.",
     "scanPending": "Pinning a revision, reading source and analyzing candidates…",
     "scanResults": "Scan results",
     "coverage": "Analyzed {count} / {eligible} eligible files; {skipped} entries skipped.",
@@ -408,7 +415,7 @@
     "partialFile": "Partial coverage",
     "changeInstruction": "Additional change instructions (optional)",
     "noFindings": "No evidence-backed candidates were found in the examined scope. This is not a clean bill of health for the entire repository.",
-    "analysisIncomplete": "Incomplete report: AI output validation failed for {count} files. They are excluded from analyzed coverage; other valid results are retained. This does not mean the failed files are free of issues.",
+    "analysisIncomplete": "Incomplete report: analysis failed for {count} files. Other results are retained. Retry unfinished batches from task details.",
     "verificationPlan": "Suggested verification (not executed)",
     "prepareCode": "Prepare code changes",
     "draftIssue": "Draft an issue from this finding",
@@ -443,8 +450,98 @@
       "empty": "Empty file",
       "scan_budget": "Read budget reached",
       "finding_budget": "Candidate budget reached",
-      "analysis_failed": "AI output validation failed; analysis incomplete",
-      "other": "Unavailable or outside this scan"
+      "analysis_failed": "AI analysis failed; excluded from completed coverage",
+      "other": "Unavailable or outside this scan",
+      "outside_plan": "Outside this plan",
+      "context_only": "Read as project context, not analyzed separately"
+    },
+    "mode": "Analysis mode",
+    "fast": "Fast (default)",
+    "deep": "Deep analysis (slower)",
+    "focus": "Analysis focus",
+    "both": "Bugs and opportunities",
+    "bugs": "Code defects",
+    "opportunities": "Features, usability, docs and tests",
+    "planFirst": "Generate a project-aware plan, adjust the file selection, then start. Fast mode is the default; each completed batch is saved.",
+    "makePlan": "Generate inspection plan",
+    "planTitle": "Project overview and inspection plan",
+    "startSelected": "Analyze selected files",
+    "selectedCount": "Selected {count} files; limit {max}. Remaining slots may include direct dependencies.",
+    "extraPaths": "Additional existing file paths (one per line)",
+    "extraPathsHint": "For example: src/main.ts",
+    "liveReport": "This is a saved partial report. Drafting and code generation become available when the task finishes. Completed batches survive cancellation or failure.",
+    "reused": "Reused {count} batches with matching version, scope and mode.",
+    "discussionOnly": "Discussion proposal, not a confirmed defect.",
+    "audience": "Audience and scenario",
+    "benefit": "Expected benefit",
+    "tradeoffs": "Tradeoffs and uncertainty",
+    "deepen": "Analyze this file deeply",
+    "issueFastNote": "Fast mode organizes the supplied description and evidence. Choose deep mode for further reasoning. Results remain available in AI tasks.",
+    "contextDocs": "Context documents: {paths}"
+  },
+  "tasks": {
+    "title": "AI tasks",
+    "recent": "Recent AI tasks",
+    "description": "Track progress, recover results, cancel further work or resume saved tasks.",
+    "details": "Task details",
+    "viewAll": "View all tasks",
+    "loading": "Loading tasks…",
+    "empty": "No AI tasks yet.",
+    "cancel": "Cancel further work",
+    "retry": "Resume / retry",
+    "retryFailed": "Retry unfinished batches",
+    "incomplete": "Incomplete report",
+    "seconds": "{count} seconds processed",
+    "cached": "{count} cached batches",
+    "openResult": "Open task page / result",
+    "leaveNote": "You can leave this page. Return through the dashboard or AI tasks. Identical active submissions reuse the existing task.",
+    "resumeNote": "Completed batches are retained. Cancellation stops further work and attempts to abort pending model requests; usage already incurred remains billable. Resuming a scan reuses valid batches for the same version.",
+    "status": {
+      "queued": "Queued",
+      "running": "Running",
+      "done": "Completed",
+      "failed": "Failed; retry available",
+      "cancelled": "Cancelled"
+    },
+    "stage": {
+      "starting": "Preparing",
+      "planning": "Understanding project and selecting modules",
+      "context": "Reading project context and template",
+      "reading": "Reading source and dependencies",
+      "analyzing": "Analyzing batches",
+      "drafting": "Drafting issue",
+      "generating": "Preparing code changes",
+      "discovering": "Finding and ranking projects",
+      "reviewing": "Reviewing PR",
+      "done": "Finished"
+    },
+    "kind": {
+      "discovery": {
+        "find": "Project discovery"
+      },
+      "repository": {
+        "plan": "Inspection plan",
+        "scan": "Repository scan"
+      },
+      "change": {
+        "prepare": "Code changes"
+      },
+      "issue": {
+        "draft": "Issue draft",
+        "check": "Duplicate check",
+        "quality": "Issue quality"
+      },
+      "review": {
+        "run": "PR review"
+      },
+      "rulecard": {
+        "build": "Repository rules"
+      },
+      "style": {
+        "build": "Review style"
+      },
+      "translate": "Translation",
+      "other": "AI task"
     }
   }
 }

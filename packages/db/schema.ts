@@ -57,7 +57,7 @@ export const aiJobs = pgTable(
     updatedAt: updatedAt(),
     userId: userId(),
     kind: text('kind').notNull(),
-    status: text('status', { enum: ['queued', 'running', 'done', 'failed'] })
+    status: text('status', { enum: ['queued', 'running', 'done', 'failed', 'cancelled'] })
       .default('queued')
       .notNull(),
     payloadJson: jsonb('payload_json').notNull(),

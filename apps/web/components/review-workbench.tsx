@@ -101,6 +101,11 @@ export function ReviewWorkbench({ owner, repo, n }: { owner: string; repo: strin
           </a>
         </Button>
       </div>
+      <div className="notice">
+        <p>{t('reviewVsMerge')}</p>
+        {self && <p>{t('ownPRExplanation')}</p>}
+        {d?.pull.draft && <p>{t('draftPRExplanation')}</p>}
+      </div>
       <ErrorNotice
         code={error ?? resource.error}
         retry={resource.error ? resource.reload : undefined}

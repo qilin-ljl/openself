@@ -99,6 +99,7 @@ export async function runAssistantTask(ctx: RunContext, kind: string, input: unk
     info = await ctx.workspace.assertRepo(ctx.user, owner, repo);
   if (info.private && !ctx.user.privateAiConsentAt)
     throw new AppError('private_ai_consent_required', 403);
+  await ctx.onProgress?.({ progress: { stage: 'context' } });
   const readme = await gh.getReadme(owner, repo),
     lang = 'lang' in parsed && parsed.lang ? parsed.lang : repositoryLanguage(readme.body);
   if (kind === 'issue.check') {
@@ -170,8 +171,9 @@ export async function runAssistantTask(ctx: RunContext, kind: string, input: unk
       })
     ).data;
   if (kind === 'issue.draft') {
+    await ctx.onProgress?.({ progress: { stage: 'drafting' } });
     const result = await ctx.provider.completeJSON({
-      tier: 'deep',
+      tier: 'mode' in parsed && parsed.mode === 'deep' ? 'deep' : 'fast',
       system: prompts.issueDraft(lang),
       user: prompts.untrusted({
         description: 'text' in parsed ? parsed.text : '',

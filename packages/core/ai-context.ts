@@ -19,4 +19,7 @@ export type RunContext = Omit<AIContext, 'provider'> & {
   user: User;
   provider: LLMProvider;
   lang: 'zh' | 'en';
+  signal?: AbortSignal;
+  checkpoint?: Record<string, unknown>;
+  onProgress?: (value: Record<string, unknown>) => Promise<void>;
 };

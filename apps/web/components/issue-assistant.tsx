@@ -2,10 +2,13 @@
 import { useState, useEffect } from 'react';
 import { useLocale, useTranslations } from 'next-intl';
 import { Button } from '@openself/ui/button';
-import type { IssueDraft, IssueQuality, JobDTO } from '@openself/shared/ai';
+import type { IssueDraft, IssueQuality } from '@openself/shared/ai';
 import type { FormAnswers } from '@openself/github/templates';
-import { api, useResource, ErrorNotice, RequestError } from './data';
+import { api, ErrorNotice, RequestError } from './data';
 import { Markdown } from './markdown';
+import { useAIJob } from './use-ai-job';
+import { JobProgress } from './job-progress';
+import { useRouter } from '../i18n/navigation';
 type DraftResult = IssueDraft & { lang: 'zh' | 'en' };
 export function IssueAssistant({
   repo,
@@ -15,6 +18,7 @@ export function IssueAssistant({
   onTranslation,
   allowTranslationApply = true,
   initialDescription,
+  initialJobId,
 }: {
   repo: string;
   templateId?: string;
@@ -23,13 +27,17 @@ export function IssueAssistant({
   onTranslation: (body: string) => void;
   allowTranslationApply?: boolean;
   initialDescription?: string;
+  initialJobId?: string;
 }) {
   const t = useTranslations('ai'),
-    locale = useLocale();
+    locale = useLocale(),
+    router = useRouter(),
+    c = useTranslations('contribute');
   const [text, setText] = useState(''),
     [answers, setAnswers] = useState<FormAnswers>({}),
     [lang, setLang] = useState<'zh' | 'en' | 'auto'>('auto'),
-    [job, setJob] = useState<string>(),
+    [mode, setMode] = useState<'fast' | 'deep'>('fast'),
+    [job, setJob] = useState(initialJobId),
     [error, setError] = useState<string>(),
     [busy, setBusy] = useState(false),
     [generated, setGenerated] = useState<DraftResult>(),
@@ -37,19 +45,38 @@ export function IssueAssistant({
     [translation, setTranslation] = useState<string>(),
     [duplicates, setDuplicates] =
       useState<{ number: number; title: string; url: string; reason: string; verdict: string }[]>();
-  const task = useResource<JobDTO>(job ? '/api/jobs/' + job : null, 2000);
+  const task = useAIJob(job);
+  useEffect(() => setJob(initialJobId), [initialJobId]);
+  useEffect(() => {
+    if (task.data?.input) {
+      const input = task.data.input as {
+        repo?: string;
+        text?: string;
+        answers?: FormAnswers;
+        mode?: 'fast' | 'deep';
+      };
+      if (input.repo === repo) {
+        setText((value) => value || input.text || '');
+        if (input.answers) setAnswers(input.answers);
+        if (input.mode) setMode(input.mode);
+      }
+    }
+  }, [task.data?.id]);
   useEffect(() => {
     if (initialDescription) setText((value) => value || initialDescription);
   }, [initialDescription]);
   useEffect(() => {
-    if (task.data?.status !== 'done') return;
+    if (
+      task.data?.status !== 'done' ||
+      (task.data.input as { repo?: string } | undefined)?.repo !== repo
+    )
+      return;
     const value = task.data.resultJson;
     if (task.data.kind === 'issue.draft') setGenerated(value as DraftResult);
     else if (task.data.kind === 'issue.check')
       setDuplicates((value as { candidates: NonNullable<typeof duplicates> }).candidates);
     else if (task.data.kind === 'issue.quality') setQuality(value as IssueQuality);
     else if (task.data.kind === 'translate') setTranslation((value as { text: string }).text);
-    setJob(undefined);
   }, [task.data]);
   async function start(kind: 'check' | 'draft' | 'quality' | 'translate', consented = false) {
     setBusy(true);
@@ -64,12 +91,13 @@ export function IssueAssistant({
                 text: draft.body,
                 to: lang === 'auto' ? (locale === 'zh' ? 'en' : 'zh') : lang,
               }
-            : { repo, text, templateId, answers, lang: lang === 'auto' ? undefined : lang };
+            : { repo, text, templateId, answers, mode, lang: lang === 'auto' ? undefined : lang };
       const result = await api<{ jobId: string }>(
         kind === 'translate' ? '/api/translate' : '/api/issues/' + kind,
         { method: 'POST', body: JSON.stringify(payload) },
       );
       setJob(result.jobId);
+      router.replace('/r/' + repo + '/issues/new?job=' + result.jobId);
     } catch (e) {
       if (
         e instanceof RequestError &&
@@ -85,11 +113,22 @@ export function IssueAssistant({
       setBusy(false);
     }
   }
-  const pending = busy || (!!job && task.data?.status !== 'failed');
+  const pending =
+    busy ||
+    (!!job && !task.error && (!task.data || ['queued', 'running'].includes(task.data.status)));
   return (
     <section className="ai-panel issue-ai">
       <h2>{t('issueAssistant')}</h2>
-      <ErrorNotice code={error ?? task.data?.error ?? undefined} />
+      <p className="muted">{c('issueFastNote')}</p>
+      <label className="field-label">
+        {c('mode')}
+        <select value={mode} onChange={(event) => setMode(event.target.value as 'fast' | 'deep')}>
+          <option value="fast">{c('fast')}</option>
+          <option value="deep">{c('deep')}</option>
+        </select>
+      </label>
+      <JobProgress job={task.data} jobId={job} />
+      <ErrorNotice code={error ?? task.error ?? task.data?.error ?? undefined} />
       <label className="field-label">
         {t('description')}
         <textarea
