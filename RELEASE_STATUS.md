@@ -18,7 +18,7 @@ The current delivery target is the local edition. It does not require public hos
 
 ## Verified results
 
-- 141 unit/integration tests pass, including contribution evidence validation, exact source edits, protected paths, branch/fork writes, stale repository identity/version, prepared-job ownership and uncertain multi-step publication outcomes, plus the existing authentication, publication, review and personal-key checks.
+- 142 unit/integration tests pass, including contribution evidence validation, exact source edits, protected paths, branch/fork writes, stale repository identity/version, prepared-job ownership and uncertain multi-step publication outcomes, plus the existing authentication, publication, review and personal-key checks. A discovery-format regression verifies that retries report the exact array limit without echoing generated content.
 - 14 desktop Playwright flows pass, including idea discovery → source scan → code preview → approved draft PR publication with isolated fixture transports. Existing dashboard, personal-key, issue, review, anonymous-access and extension flows also pass.
 - Lint, all workspace type checks, Web/Worker build and Chrome/Edge extension builds pass.
 - Real DeepSeek smoke calls returned valid JSON with thinking enabled and disabled. This validates protocol compatibility, not review accuracy.

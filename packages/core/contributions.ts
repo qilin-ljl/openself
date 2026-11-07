@@ -78,7 +78,7 @@ export async function discoverProjects(ctx: RunContext, input: unknown): Promise
       system:
         '[TASK:ideaQueries] ' +
         SAFETY +
-        ' Turn the supplied idea into up to three short GitHub repository search queries, using relevant keywords and optional language qualifiers. Return {"queries":["..."]}.',
+        ' Turn the supplied idea into one to three short GitHub repository search queries, each 1–160 characters, using relevant keywords and optional language qualifiers. Return {"queries":["..."]}.',
       user: untrusted({ idea }),
       schema: IdeaQueries,
       maxTokens: 900,
@@ -113,7 +113,7 @@ export async function discoverProjects(ctx: RunContext, input: unknown): Promise
         SAFETY +
         ' ' +
         language(ctx) +
-        ' Rank only the supplied real repositories for the idea. Explain the evidence from descriptions/readmes and suggest contribution directions as hypotheses, not confirmed bugs or claims that an undocumented feature is absent. Do not invent projects or metrics. Return {"projects":[{"repo":"owner/name","reason":"...","directions":["..."]}]}.',
+        ' Rank only the supplied real repositories for the idea. Return at most six projects, even if more candidates are supplied; an empty array is valid. Each project must have a repo in owner/name format (not a URL), a reason of at most 2000 characters, and at most three directions, each at most 1000 characters. Explain the evidence from descriptions/readmes and suggest contribution directions as hypotheses, not confirmed bugs or claims that an undocumented feature is absent. Do not invent projects or metrics. Return {"projects":[{"repo":"owner/name","reason":"...","directions":["..."]}]}.',
       user: untrusted({
         idea,
         projects: sources.map(({ repo, readme }) => ({

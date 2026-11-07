@@ -74,7 +74,15 @@ export function createDeepSeekProvider(options: {
             '\nThe previous json failed validation. Fix these fields: ' +
             parsed.error.issues
               .slice(0, 5)
-              .map((issue) => issue.path.join('.') + ' ' + issue.code)
+              .map((issue) => {
+                const bound =
+                  issue.code === 'too_big'
+                    ? ' maximum=' + String(issue.maximum)
+                    : issue.code === 'too_small'
+                      ? ' minimum=' + String(issue.minimum)
+                      : '';
+                return issue.path.join('.') + ' ' + issue.code + bound;
+              })
               .join('; ');
         } catch {
           correction =

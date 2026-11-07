@@ -77,3 +77,33 @@ it('rejects an invalid schema twice without exposing generated content', async (
     }),
   ).rejects.toMatchObject({ code: 'llm_output_invalid', message: 'llm_output_invalid' });
 });
+
+it('tells the model the exact array limit when retrying an oversized result', async () => {
+  const corrections: string[] = [];
+  server.use(
+    http.post('https://api.deepseek.com/chat/completions', async ({ request }) => {
+      const body = (await request.json()) as { messages: { content: string }[] };
+      const prompt = body.messages[1]!.content;
+      corrections.push(prompt);
+      return response(
+        JSON.stringify({
+          projects: Array.from(
+            { length: prompt.includes('maximum=6') ? 6 : 8 },
+            () => 'private-generated-text',
+          ),
+        }),
+      );
+    }),
+  );
+  const result = await provider().completeJSON({
+    tier: 'fast',
+    system: 'Return json projects.',
+    user: 'Find projects',
+    schema: z.object({ projects: z.array(z.string()).max(6) }),
+  });
+  expect(result.data.projects).toHaveLength(6);
+  expect(corrections).toHaveLength(2);
+  expect(corrections[1]).toContain('projects too_big maximum=6');
+  expect(corrections[1]).not.toContain('private-generated-text');
+  expect(result.usage.input).toBe(20);
+});
