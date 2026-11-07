@@ -268,7 +268,7 @@ export async function scanRepository(
           })),
         }),
         schema: ScanBatch,
-        maxTokens: tier === 'deep' ? 8000 : 5000,
+        maxTokens: tier === 'deep' ? 16000 : 5000,
       });
     let result;
     try {

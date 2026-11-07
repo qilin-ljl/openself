@@ -291,3 +291,17 @@ it('retains successful earlier batches when a later batch fails validation', asy
   expect(result.analysisFailedFiles).toBe(2);
   expect(result.scanned.map((file) => file.path)).toEqual(['src.ts', 'z1.ts']);
 });
+
+it('allows the deep scan enough output budget for reasoning and the JSON answer', async () => {
+  const ctx = context();
+  ctx.provider = {
+    async completeJSON(options) {
+      if (options.tier !== 'deep' || (options.maxTokens ?? 0) < 16000)
+        throw new AppError('llm_output_invalid', 502);
+      return provider.completeJSON(options);
+    },
+  };
+  const result = await scanRepository(ctx, { repo: 'o/r', maxFiles: 20 });
+  expect(result.examinedFiles).toBe(1);
+  expect(result.findings).toHaveLength(1);
+});

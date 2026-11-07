@@ -18,7 +18,7 @@ The current delivery target is the local edition. It does not require public hos
 
 ## Verified results
 
-- 146 unit/integration tests pass, including contribution evidence validation, exact source edits, protected paths, branch/fork writes, stale repository identity/version, prepared-job ownership and uncertain multi-step publication outcomes, plus the existing authentication, publication, review and personal-key checks. Format regressions cover exact array limits, per-batch fallback, preservation of earlier findings, honest incomplete coverage and propagation of credential errors.
+- 147 unit/integration tests pass, including contribution evidence validation, exact source edits, protected paths, branch/fork writes, stale repository identity/version, prepared-job ownership and uncertain multi-step publication outcomes, plus the existing authentication, publication, review and personal-key checks. Format regressions cover exact array limits, per-batch fallback, preservation of earlier findings, honest incomplete coverage, propagation of credential errors and the deep scan output budget.
 - 14 desktop Playwright flows pass, including idea discovery → source scan → code preview → approved draft PR publication with isolated fixture transports. Existing dashboard, personal-key, issue, review, anonymous-access and extension flows also pass.
 - Lint, all workspace type checks, Web/Worker build and Chrome/Edge extension builds pass.
 - Real DeepSeek smoke calls returned valid JSON with thinking enabled and disabled. This validates protocol compatibility, not review accuracy.
@@ -40,6 +40,8 @@ Discovery ranks only repositories returned by GitHub. Matching reasons and impro
 Repository scans are public-only and read a pinned default-branch commit. The default budget is 20 files (UI choices 10/20/50/100), at most 400 lines / 16,000 characters per file and 160,000 characters total. Coverage and skipped files are visible. Findings must cite actual code at the claimed line; static evidence alone does not establish runtime correctness. Code generation prepares at most five files using exact source context. No target repository code, dependency installation or tests are executed.
 
 If deep-model output remains invalid after its format retry, only that batch is retried with the fast model. If validation still fails, its files are explicitly marked as incomplete and excluded from analyzed coverage; valid results from other batches are retained. An incomplete report is not a clean scan, including when every batch fails. Credential failures still surface as errors.
+
+A live diagnostic observed an empty answer with `finish_reason: length` and 8,000 completion tokens. Deep scan calls now allow up to 16,000 output tokens, matching the provider's default deep budget; this raises the possible per-call usage and does not guarantee every response will validate. The exact malformed response from the older failed task was not retained.
 
 Publication rechecks repository ID, default branch, base commit and file identities. It creates a separate branch, using the viewer's fork when upstream is not writable, and defaults to a draft PR. There is no automatic merge. A confirmed intermediate write followed by failure is marked uncertain and cannot be blindly republished; the user may need to inspect a created fork/branch on GitHub. Real external fork/PR creation for this new flow has not been exercised; its write behavior is verified using isolated GitHub fixtures.
 
