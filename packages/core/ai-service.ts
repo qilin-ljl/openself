@@ -827,7 +827,7 @@ export function createAIService(ctx: AIContext) {
               .set({ status: 'failed', error: code })
               .where(eq(schema.reviewSessions.id, payload.reviewSessionId));
         }
-        if (code === 'job_cancelled') return;
+        if (['job_cancelled', 'patch_no_changes', 'patch_no_effect'].includes(code)) return;
         throw new AppError(code, 502);
       } finally {
         clearInterval(heartbeat);

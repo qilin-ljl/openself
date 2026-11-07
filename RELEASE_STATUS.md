@@ -10,6 +10,8 @@ At the user's explicit request, automated tests, browser tests and live AI calls
 
 Draft queue extension: separate issue, authored PR and review categories; user-scoped server-side search over titles, bodies, repositories, URLs and numbers; paginated history; separate read-only GitHub state lookups for published items. Review entries track the target PR. Access failures remain unknown instead of implying closed/merged. This extension follows the same requested verification scope: no new tests and no test suite execution.
 
+Code-generation repair: context selection now prioritizes explicitly mentioned files and nearby module manifests/configuration, up to eight files. Dependency manifest/config edits are permitted when justified; generated lockfiles, credentials and workflows remain excluded. Empty proposals and no-op edits have distinct errors and retain the model explanation, without automatically repeating an unchanged no-op request. The editor offers clarification, re-preparation and Issue fallback. No new tests or live model replay were performed for this repair; historical failure details were not retained and cannot be reconstructed exactly.
+
 ## Historical v0.2 verification
 
 

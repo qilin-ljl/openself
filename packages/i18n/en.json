@@ -204,7 +204,7 @@
       "stale_repository": "The default branch has moved. Scan the repository and prepare the change again.",
       "protected_path": "This change touches a protected file or path and needs manual handling.",
       "repository_tree_incomplete": "The repository tree is incomplete; a code PR cannot be prepared safely.",
-      "patch_invalid": "AI did not produce an applicable change. Add context and prepare it again.",
+      "patch_invalid": "Code changes failed validation; no publishable PR draft was generated. Read the explanation and adjust the request.",
       "patch_context_mismatch": "The edit does not match its original source context. Prepare the change again.",
       "fork_conflict": "The existing repository cannot be used as the required fork. Check it on GitHub.",
       "fork_not_ready": "The fork is not ready. Check its state on GitHub.",
@@ -212,7 +212,12 @@
       "contribution_branch_changed": "The contribution branch changed. Publication stopped; check GitHub.",
       "job_cancelled": "Task cancelled. Saved analysis can be resumed from task history.",
       "job_already_done": "Task already completed. Open its result.",
-      "scan_plan_empty": "No valid files were selected. Adjust the goal and generate another plan."
+      "scan_plan_empty": "No valid files were selected. Adjust the goal and generate another plan.",
+      "patch_no_changes": "AI returned no changes. Read its explanation, clarify the request or draft an issue.",
+      "patch_no_effect": "The proposed content matches the original files; there is no diff for a PR.",
+      "patch_duplicate_path": "AI returned duplicate file changes. Prepare the changes again.",
+      "patch_empty_edits": "AI named a file to edit without providing replacement edits.",
+      "patch_too_large": "The proposed change exceeds the size limit. Narrow its scope."
     },
     "status": {
       "draft": "Draft",
@@ -477,7 +482,12 @@
     "tradeoffs": "Tradeoffs and uncertainty",
     "deepen": "Analyze this file deeply",
     "issueFastNote": "Fast mode organizes the supplied description and evidence. Choose deep mode for further reasoning. Results remain available in AI tasks.",
-    "contextDocs": "Context documents: {paths}"
+    "contextDocs": "Context documents: {paths}",
+    "changeFailedNote": "This step only prepares a diff. No branch or PR has been created. A suggestion may already be partly implemented or require more information; unrelated changes should not be invented to create a PR.",
+    "changeExplanation": "Explanation returned by AI",
+    "legacyChangeFailure": "This older task has no saved generation explanation. Clarify the request and prepare again; new tasks retain the explanation.",
+    "changeContextFiles": "Context files: {files}",
+    "prepareAgain": "Prepare with these instructions"
   },
   "tasks": {
     "title": "AI tasks",

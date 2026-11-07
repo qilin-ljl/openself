@@ -204,7 +204,7 @@
       "stale_repository": "仓库默认分支已有新提交，请重新体检并生成改动。",
       "protected_path": "改动涉及受保护的文件或路径，请改为手动处理。",
       "repository_tree_incomplete": "仓库目录清单不完整，暂不能安全生成代码 PR。",
-      "patch_invalid": "AI 没有生成可应用的改动，请补充说明后重新准备。",
+      "patch_invalid": "代码改动未通过校验，尚未生成可发布的 PR 草稿。请查看说明后调整要求。",
       "patch_context_mismatch": "代码修改的原文上下文不匹配，请重新准备改动。",
       "fork_conflict": "无法使用当前同名仓库作为 Fork，请先在 GitHub 检查。",
       "fork_not_ready": "Fork 尚未就绪，请先到 GitHub 核对状态。",
@@ -212,7 +212,12 @@
       "contribution_branch_changed": "贡献分支已有其他改动，发布已停止，请到 GitHub 检查。",
       "job_cancelled": "任务已取消。已完成的分析已保留，可从任务记录继续。",
       "job_already_done": "任务已经完成，请直接查看结果。",
-      "scan_plan_empty": "AI 未选出有效检查文件，请调整目标后重新生成计划。"
+      "scan_plan_empty": "AI 未选出有效检查文件，请调整目标后重新生成计划。",
+      "patch_no_changes": "AI 判断目前没有可生成的改动，请查看具体说明，补充要求或改为起草 Issue。",
+      "patch_no_effect": "生成的内容与原文件相同，没有实际差异可用于 PR。",
+      "patch_duplicate_path": "AI 对同一文件给出了重复改动，请重新准备。",
+      "patch_empty_edits": "AI 指定了修改文件，但没有提供具体替换内容。",
+      "patch_too_large": "生成的改动超过单次大小限制，请缩小修改范围。"
     },
     "status": {
       "draft": "待确认",
@@ -477,7 +482,12 @@
     "tradeoffs": "代价与不确定性",
     "deepen": "深入分析此文件",
     "issueFastNote": "默认快速整理已有描述和代码证据；需要进一步论证时可选择深度模式。结果可从 AI 任务中找回。",
-    "contextDocs": "参考资料：{paths}"
+    "contextDocs": "参考资料：{paths}",
+    "changeFailedNote": "这一步只准备代码差异，还没有向 GitHub 创建分支或提交 PR。改进建议可能已经部分实现，也可能需要更多信息；不能为了创建 PR 而强行生成无关改动。",
+    "changeExplanation": "AI 返回的说明",
+    "legacyChangeFailure": "此历史任务没有保存具体生成说明。补充要求后可重新准备，新任务会保留说明。",
+    "changeContextFiles": "本次参考文件：{files}",
+    "prepareAgain": "按补充要求重新准备"
   },
   "tasks": {
     "title": "AI 任务",

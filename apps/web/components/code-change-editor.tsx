@@ -1,18 +1,42 @@
 'use client';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useTranslations } from 'next-intl';
 import { Button } from '@openself/ui/button';
 import type { PreparedChange } from '@openself/shared/contributions';
 import type { DraftDTO } from '@openself/shared/api';
-import { Link } from '../i18n/navigation';
+import { Link, useRouter } from '../i18n/navigation';
 import { CodeChanges } from './code-changes';
-import { api, ErrorNotice, RequestError } from './data';
+import { api, ErrorNotice, RequestError, useResource } from './data';
 import { useAIJob } from './use-ai-job';
 import { JobProgress } from './job-progress';
 export function CodeChangeEditor({ jobId }: { jobId: string }) {
   const t = useTranslations('contribute'),
-    w = useTranslations('workspace');
+    w = useTranslations('workspace'),
+    router = useRouter();
   const task = useAIJob(jobId);
+  const source =
+    task.data?.kind === 'change.prepare'
+      ? (task.data.input as
+          { scanJobId: string; findingId: string; instruction?: string } | undefined)
+      : undefined;
+  const context = useResource<{ repo: string; title: string }>(
+    source
+      ? '/api/scans/' +
+          encodeURIComponent(source.scanJobId) +
+          '/findings/' +
+          encodeURIComponent(source.findingId)
+      : null,
+  );
+  const diagnostic = (
+    task.data?.resultJson as {
+      changeDiagnostic?: { code: string; reason: string; files: string[] };
+    } | null
+  )?.changeDiagnostic;
+  const [instruction, setInstruction] = useState(''),
+    [preparing, setPreparing] = useState(false);
+  useEffect(() => {
+    if (source) setInstruction(source.instruction ?? '');
+  }, [task.data?.id]);
   const result =
     task.data?.kind === 'change.prepare' && task.data.status === 'done'
       ? (task.data.resultJson as PreparedChange)
@@ -23,6 +47,26 @@ export function CodeChangeEditor({ jobId }: { jobId: string }) {
   const [busy, setBusy] = useState(false),
     [saved, setSaved] = useState(false),
     [error, setError] = useState<string>();
+  async function prepareAgain() {
+    if (!source) return;
+    setPreparing(true);
+    setError(undefined);
+    try {
+      const response = await api<{ jobId: string }>('/api/prepare-change', {
+        method: 'POST',
+        body: JSON.stringify({
+          scanJobId: source.scanJobId,
+          findingId: source.findingId,
+          instruction,
+        }),
+      });
+      router.push('/changes/' + response.jobId);
+    } catch (e) {
+      setError(e instanceof RequestError ? e.code : 'unknown');
+    } finally {
+      setPreparing(false);
+    }
+  }
   async function save() {
     if (!result) return;
     setBusy(true);
@@ -61,6 +105,62 @@ export function CodeChangeEditor({ jobId }: { jobId: string }) {
         retry={task.error ? task.reload : undefined}
       />
       <JobProgress job={task.data} jobId={jobId} />
+      {task.data && ['failed', 'cancelled'].includes(task.data.status) && (
+        <section className="contribution-entry">
+          {context.data && <h2>{context.data.title}</h2>}
+          <p>{t('changeFailedNote')}</p>
+          {diagnostic?.reason ? (
+            <>
+              <h3>{t('changeExplanation')}</h3>
+              <p className="change-diagnostic">{diagnostic.reason}</p>
+            </>
+          ) : (
+            <p className="muted">{t('legacyChangeFailure')}</p>
+          )}
+          {!!diagnostic?.files.length && (
+            <p className="muted">
+              {t('changeContextFiles', { files: diagnostic.files.join(', ') })}
+            </p>
+          )}
+          {source && (
+            <>
+              <label className="field-label">
+                {t('changeInstruction')}
+                <textarea
+                  maxLength={3000}
+                  value={instruction}
+                  onChange={(event) => setInstruction(event.target.value)}
+                />
+              </label>
+              <div className="inline-actions">
+                <Button disabled={preparing} onClick={prepareAgain}>
+                  {preparing ? t('working') : t('prepareAgain')}
+                </Button>
+                {context.data && (
+                  <>
+                    <Link href={'/r/' + context.data.repo + '/scan?job=' + source.scanJobId}>
+                      {t('backToScan')}
+                    </Link>
+                    <Link
+                      href={
+                        '/r/' +
+                        context.data.repo +
+                        '/issues/new?scan=' +
+                        source.scanJobId +
+                        '&finding=' +
+                        source.findingId
+                      }
+                    >
+                      {t('draftIssue')}
+                    </Link>
+                  </>
+                )}
+              </div>
+            </>
+          )}
+          <ErrorNotice code={context.error} />
+        </section>
+      )}
       {(!task.data || ['queued', 'running'].includes(task.data.status)) && (
         <p role="status">{t('codePending')}</p>
       )}
