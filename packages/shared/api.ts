@@ -1,4 +1,5 @@
 import { z } from 'zod';
+import { PullRequestDraftInput, PullRequestPayload } from './contributions';
 export const GitHubProfile = z.object({
   id: z.number().int().positive(),
   login: z.string().min(1),
@@ -71,6 +72,11 @@ export type ReviewComment = z.infer<typeof ReviewComment>;
 export const CreateDraft = z.discriminatedUnion('kind', [
   z.object({ kind: z.literal('issue'), repo: RepositoryName, payload: IssuePayload }),
   z.object({
+    kind: z.literal('pull_request'),
+    repo: RepositoryName,
+    payload: PullRequestDraftInput,
+  }),
+  z.object({
     kind: z.literal('review'),
     repo: RepositoryName,
     prNumber: z.number().int().positive(),
@@ -108,6 +114,7 @@ const DraftBase = z.object({
 export const DraftDTO = z.discriminatedUnion('kind', [
   DraftBase.extend({ kind: z.literal('issue'), payloadJson: IssuePayload }),
   DraftBase.extend({ kind: z.literal('review'), payloadJson: ReviewPayload }),
+  DraftBase.extend({ kind: z.literal('pull_request'), payloadJson: PullRequestPayload }),
 ]);
 export type IssuePayload = z.infer<typeof IssuePayload>;
 export type DraftDTO = z.infer<typeof DraftDTO>;

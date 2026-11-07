@@ -11,7 +11,10 @@ export function startAIWorkers(env: Environment) {
     ai = createAIService({ db, env, workspace }),
     connection = redisConnection(env.REDIS_URL);
   const queues = new Map(
-    ['review', 'rulecard', 'style', 'issue'].map((name) => [name, new Queue(name, { connection })]),
+    ['review', 'rulecard', 'style', 'issue', 'discovery', 'repository', 'change'].map((name) => [
+      name,
+      new Queue(name, { connection }),
+    ]),
   );
   for (const q of queues.values())
     q.on('error', () => console.error(JSON.stringify({ event: 'ai.queue_error' })));
@@ -21,7 +24,14 @@ export function startAIWorkers(env: Environment) {
       async (job) => {
         await ai.run(String(job.data.jobId));
       },
-      { connection, concurrency: name === 'review' ? 2 : 3 },
+      {
+        connection,
+        concurrency: ['discovery', 'repository', 'change'].includes(name)
+          ? 1
+          : name === 'review'
+            ? 2
+            : 3,
+      },
     );
     w.on('error', () => console.error(JSON.stringify({ event: 'ai.worker_error', queue: name })));
     w.on('failed', (job) => console.error(JSON.stringify({ event: 'ai.job_failed', id: job?.id })));

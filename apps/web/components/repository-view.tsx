@@ -50,6 +50,9 @@ export function RepositoryView({
         </div>
         <div className="inline-actions">
           <Button variant="outline" asChild>
+            <Link href={'/r/' + owner + '/' + repo + '/scan'}>{t('scanRepository')}</Link>
+          </Button>
+          <Button variant="outline" asChild>
             <a href={'https://github.com/' + owner + '/' + repo} target="_blank" rel="noreferrer">
               {t('openGithub')}
               <ArrowUpRight size={16} />

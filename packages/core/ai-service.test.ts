@@ -263,6 +263,15 @@ it('creates a default style for a new user without inventing history', async () 
     profileJson: { tone: 'neutral', focusOrder: ['bug', 'tests', 'readability'] },
   });
 });
+it('rejects private repository scanning without asking for AI data consent', async () => {
+  const u = await user();
+  privateRepo = true;
+  await expect(
+    service.scan({ ...u, privateRepoEnabled: true }, { repo: 'o/r' }),
+  ).rejects.toMatchObject({ code: 'scan_public_only' });
+  expect(await db.select().from(schema.aiJobs)).toHaveLength(0);
+  expect(await db.select().from(schema.usageCounters)).toHaveLength(0);
+});
 it('cannot attach another user AI session to a review draft', async () => {
   const owner = await user(),
     other = await user(2);

@@ -80,6 +80,7 @@
       <a href="#extension"><span>08</span>浏览器插件（可选）</a>
       <a href="#startup"><span>09</span>下次怎么打开</a>
       <a href="#faq"><span>10</span>常见问题</a>
+      <a href="#contribute"><span>11</span>AI 找项目、体检与创建 PR</a>
     </nav>
     <p class="sidebar-foot">第一次不用全部看完。<br>先做第 00 节，再按需要选择 Issue 或 PR 流程。<br><br>查找关键词：Ctrl + F</p>
   </aside>
@@ -145,6 +146,7 @@
         <tbody>
           <tr><td><a href="http://localhost:3000/zh/dashboard" target="_blank" rel="noopener">工作台</a></td><td>上方“我的仓库”显示当前 GitHub 账号名下的项目，点击直接进入 PR 列表。下方还有“待我审查”“我的 PR”、草稿数量和贡献雷达。</td></tr>
           <tr><td><a href="http://localhost:3000/zh/search" target="_blank" rel="noopener">项目发现</a></td><td>搜索你感兴趣的项目，然后查看说明、Issues 和 Pull requests。</td></tr>
+          <tr><td><a href="http://localhost:3000/zh/contribute" target="_blank" rel="noopener">AI 贡献</a></td><td>描述想法寻找项目，扫描公开仓库，再生成 Issue 或代码改动与 PR 草稿。</td></tr>
           <tr><td><a href="http://localhost:3000/zh/drafts" target="_blank" rel="noopener">草稿队列</a></td><td>预览、编辑、丢弃草稿，或确认向 GitHub 发布。</td></tr>
           <tr><td><a href="http://localhost:3000/zh/audit" target="_blank" rel="noopener">发布记录</a></td><td>查看已经成功发布的记录，再跳转 GitHub 核对。</td></tr>
           <tr><td><a href="http://localhost:3000/zh/settings" target="_blank" rel="noopener">账号设置</a></td><td>配置个人 Key、审查风格、学习模式、私有仓库权限等。</td></tr>
@@ -351,7 +353,7 @@ pnpm dev</pre>
       <details><summary>Key 保存了，却提示无效或模型服务不可用</summary><p>“已保存”只表示存入成功。确认使用的是 DeepSeek API Key、复制是否完整、账户是否可用，再重试。模型网络或服务故障也可能导致不可用；不需要反复新建相同任务。</p></details>
       <details><summary>AI 一直处理，或者草稿一直显示“已批准”</summary><p>先给任务一些处理时间。持续不变化时，确认后台 Worker 正在运行；按第 09 节启动的 <code>pnpm dev</code> 会同时运行它。需要诊断时，在另一个项目终端执行 <code>pnpm worker:ping</code>，成功应显示 <code>ok: true</code>。</p></details>
       <details><summary>可以向别人的项目提 Issue 或提交审查吗？</summary><p>可以。通过“项目发现”打开对应仓库，准备 Issue 或已有 PR 的审查草稿，再确认发布。当前本地版已移除测试仓库限制，具体操作仍需符合 GitHub 权限和仓库规则。</p></details>
-      <details><summary>能直接修改代码并创建新的 PR 吗？</summary><p>当前 OpenSelf 负责创建 Issue、审查已有 PR 和发布审查意见。修改项目代码、创建分支和发起新的 PR，需要使用 Git、代码编辑器或 GitHub 完成。</p></details>
+      <details><summary>能直接修改代码并创建新的 PR 吗？</summary><p>可以。打开“AI 贡献”，体检公开仓库，在一条候选发现下点“准备代码改动”。检查差异并保存 PR 草稿，再到草稿队列确认。OpenSelf 会创建独立分支，必要时先 fork，然后提交 PR；不会自动合并。详见第 11 节。</p></details>
       <details><summary>为什么没有“起草 Issue”按钮？</summary><p>先等仓库资料加载完成。仓库已归档或没有开启 Issues 时，不会显示可用的起草入口；可以点“在 GitHub 查看”核对项目状态。</p></details>
       <details><summary>为什么找不到 PR，或看不到代码差异？</summary><p>先确认项目确实有 PR，并检查“开放 / 已关闭”筛选。没有文本差异可能是二进制文件或内容过大；系统会提示，必要时到 GitHub 查看原始改动。</p></details>
       <details><summary>我点了“接受”，为什么草稿队列没有东西？</summary><p>接受只选中一条 AI 建议。还需要点“将已接受意见加入草稿”，填写总评和结论，再点“生成审查草稿”。</p></details>
@@ -359,8 +361,35 @@ pnpm dev</pre>
       <details><summary>为什么设置中还看到 platform.aux 等旧记录？</summary><p>这是切换为个人 Key 模式之前保留的历史用量。现在的新 AI 任务只使用当前账号的个人 Key，历史记录不会开启共享 Key。</p></details>
     </section>
 
+    <section id="contribute">
+      <div class="section-heading"><span class="number">11</span><h2>AI 找项目、体检与创建 PR</h2></div>
+      <p>先在账号设置保存自己的 API Key，再打开顶部 <a href="http://localhost:3000/zh/contribute" target="_blank" rel="noopener">AI 贡献</a>。查找、分析和生成改动会使用你的模型账户额度。</p>
+      <h3>有一个想法，先找合适的项目</h3>
+      <ol class="steps">
+        <li>在 <span class="tag">描述你的想法</span> 中说明想做什么、熟悉的语言和希望改进的方向。例如：“想给 TypeScript 命令行工具补充输入校验和测试，找一个规模适中、还在维护的项目。”</li>
+        <li>点 <span class="tag">寻找项目</span>。AI 会整理搜索条件，读取真实 GitHub 仓库信息和 README，再给出匹配理由与贡献方向。没有匹配结果也可能是正常结果。</li>
+        <li>查看项目卡片；选择一个感兴趣的仓库，点 <span class="tag">体检这个仓库</span>。推荐并不保证维护者会接受某个 PR，先阅读项目的贡献规则。</li>
+      </ol>
+      <h3>已经知道仓库，直接体检</h3>
+      <ol class="steps">
+        <li>在 AI 贡献页面输入公开仓库的 GitHub 链接或“账号/仓库名”；也可以从仓库页面点击 <span class="tag">AI 体检</span>。</li>
+        <li>填写可选的检查重点，选择文件数量，点 <span class="tag">开始体检</span>。默认最多分析 20 个文件；较大的范围会花更长时间并消耗更多额度。</li>
+        <li>先看覆盖范围和跳过原因，再阅读候选问题的文件、行号、代码证据、修改建议与验证步骤。点击代码链接可查看扫描时的确切版本。</li>
+        <li>想提文字建议，点 <span class="tag">用此发现起草 Issue</span>，继续按仓库模板填写、检查并保存草稿。候选的证据会带入描述，不会直接发布。</li>
+      </ol>
+      <h3>让 AI 生成改动，再提交新的 PR</h3>
+      <ol class="steps">
+        <li>在体检结果中选定一条候选；可补充修改要求，再点 <span class="tag">准备代码改动</span>。</li>
+        <li>进入 <span class="tag">代码改动预览</span>，逐项查看增加、删除的内容以及建议测试步骤。此时还没有创建 GitHub 分支。</li>
+        <li>编辑 PR 标题和正文。默认勾选 <span class="tag">以草稿 PR 创建</span>，方便后续验证；点 <span class="tag">保存 PR 草稿</span>。</li>
+        <li>进入草稿队列，展开预览，确认仓库、基准版本和完整差异后，点 <span class="tag">批准并发布</span> 并确认弹窗。系统才会写入 GitHub。</li>
+        <li>有目标仓库写权限时，系统在该仓库创建独立分支；没有写权限时，先在你的账号下复用或创建 fork，再从分支向原仓库提交 PR。成功后点“在 GitHub 查看”。</li>
+      </ol>
+      <div class="note"><strong>体检范围与验证状态会明确显示。</strong><br>当前仅支持公开仓库；每文件最多分析前 400 行、16,000 字符，总计最多 160,000 字符。生成改动最多 5 个文件，跳过密钥、工作流、二进制和生成内容。系统不会执行目标仓库代码或测试，候选并不等于已证实的缺陷；按给出的步骤验证后，再决定是否发布或转为正式 PR。</div>
+      <p>如果提示仓库版本已变化，请重新体检并生成改动；如果自己的同名仓库并非目标仓库的 fork，系统会提示冲突。发布途中出现“结果尚未确认”时，可能已创建 fork 或分支，先去 GitHub 核实再处理，避免重复提交。OpenSelf 不会自动合并 PR。</p>
+    </section>
     <footer>
-      <p>适用范围：OpenSelf v0.1 桌面本地版，个人 API Key 模式。页面按钮与当前项目实现对应；不需要先安装浏览器插件，也不需要手机端。</p>
+      <p>适用范围：OpenSelf v0.2 桌面本地版，个人 API Key 模式。页面按钮与当前项目实现对应；不需要先安装浏览器插件，也不需要手机端。</p>
       <p>项目位置：<code>C:\Users\pc\Desktop\githubpr</code>。想以后再看，直接双击本手册的 HTML 文件；也可以用顶部按钮打印或另存为 PDF。</p>
     </footer>
   </main>

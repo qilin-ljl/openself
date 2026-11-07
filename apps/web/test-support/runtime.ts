@@ -44,6 +44,24 @@ export async function initializeTestContext() {
     keyEnc: encrypt('test-personal-key-1234', env.ENCRYPTION_KEY),
     last4: '1234',
   });
+  const [contributionUser] = await db
+    .insert(schema.users)
+    .values({
+      githubId: 900002,
+      login: 'contribution-tester',
+      name: 'Contribution Tester',
+    })
+    .returning();
+  await db.insert(schema.oauthTokens).values({
+    userId: contributionUser!.id,
+    accessTokenEnc: encrypt('test-contributions-token', env.ENCRYPTION_KEY),
+    scopes: 'public_repo',
+  });
+  await db.insert(schema.userApiKeys).values({
+    userId: contributionUser!.id,
+    keyEnc: encrypt('test-contributions-key-5678', env.ENCRYPTION_KEY),
+    last4: '5678',
+  });
   const repository = {
     id: 1,
     name: 'sandbox',
@@ -112,7 +130,89 @@ export async function initializeTestContext() {
         '@@ -0,0 +1,4 @@\n+import { review } from "../src/review";\n+test("empty input", () => {\n+  expect(review("")).toBeNull();\n+});',
     },
   ];
+  const sourceBody =
+    'export function review(input: string) {\n  if (!input) return null;\n  const value = input.trim();\n  return value;\n}\n';
+  const contributionRefs = new Map<string, string>();
   const handlers = [
+    http.get('https://api.github.com/user', ({ request }) =>
+      HttpResponse.json(
+        request.headers.get('authorization')?.includes('test-contributions-token')
+          ? { id: 900002, login: 'contribution-tester' }
+          : { id: 900001, login: 'test-contributor' },
+      ),
+    ),
+    http.get('https://api.github.com/repos/tester/sandbox/commits/main', () =>
+      HttpResponse.json({ sha: 'b'.repeat(40) }),
+    ),
+    http.get('https://api.github.com/repos/tester/sandbox/git/commits/:sha', ({ params }) =>
+      HttpResponse.json({ sha: params.sha, tree: { sha: 'c'.repeat(40) } }),
+    ),
+    http.get('https://api.github.com/repos/tester/sandbox/git/trees/:sha', () =>
+      HttpResponse.json({
+        truncated: false,
+        tree: [
+          {
+            path: 'src/review.ts',
+            mode: '100644',
+            type: 'blob',
+            sha: 'd'.repeat(40),
+            size: sourceBody.length,
+          },
+          { path: '.env', mode: '100644', type: 'blob', sha: '9'.repeat(40), size: 50 },
+        ],
+      }),
+    ),
+    http.get('https://api.github.com/repos/tester/sandbox/git/blobs/:sha', ({ params }) =>
+      HttpResponse.json({
+        sha: params.sha,
+        encoding: 'base64',
+        size: sourceBody.length,
+        content: Buffer.from(sourceBody).toString('base64'),
+      }),
+    ),
+    http.get(/https:\/\/api\.github\.com\/repos\/tester\/sandbox\/git\/ref\/.+/, ({ request }) => {
+      const ref = decodeURIComponent(new URL(request.url).pathname.split('/git/ref/')[1]!);
+      const sha = contributionRefs.get(ref);
+      return sha ? HttpResponse.json({ object: { sha } }) : new HttpResponse(null, { status: 404 });
+    }),
+    http.post('https://api.github.com/repos/tester/sandbox/git/refs', async ({ request }) => {
+      const body = (await request.json()) as { ref: string; sha: string };
+      contributionRefs.set(body.ref.replace(/^refs\//, ''), body.sha);
+      return HttpResponse.json({ object: { sha: body.sha } });
+    }),
+    http.post('https://api.github.com/repos/tester/sandbox/git/blobs', () =>
+      HttpResponse.json({ sha: 'e'.repeat(40) }),
+    ),
+    http.post('https://api.github.com/repos/tester/sandbox/git/trees', () =>
+      HttpResponse.json({ sha: 'f'.repeat(40) }),
+    ),
+    http.post('https://api.github.com/repos/tester/sandbox/git/commits', () =>
+      HttpResponse.json({ sha: '1'.repeat(40) }),
+    ),
+    http.patch(
+      /https:\/\/api\.github\.com\/repos\/tester\/sandbox\/git\/refs\/.+/,
+      async ({ request }) => {
+        const ref = decodeURIComponent(new URL(request.url).pathname.split('/git/refs/')[1]!);
+        const body = (await request.json()) as { sha: string; force: boolean };
+        if (!ref.startsWith('heads/codex/openself-') || body.force)
+          return new HttpResponse(null, { status: 422 });
+        contributionRefs.set(ref, body.sha);
+        return HttpResponse.json({ object: { sha: body.sha } });
+      },
+    ),
+    http.post('https://api.github.com/repos/tester/sandbox/pulls', async ({ request }) => {
+      const body = (await request.json()) as { head: string; base: string; draft: boolean };
+      if (
+        body.base !== 'main' ||
+        !body.head.startsWith('codex/openself-') ||
+        !contributionRefs.has('heads/' + body.head)
+      )
+        return new HttpResponse(null, { status: 422 });
+      return HttpResponse.json({
+        number: 99,
+        html_url: 'https://github.com/tester/sandbox/pull/99',
+      });
+    }),
     http.get('https://api.github.com/user/repos', () =>
       HttpResponse.json([
         ownedRepository,
@@ -248,7 +348,48 @@ export async function initializeTestContext() {
       const payload = (await request.json()) as { messages: { content: string }[] };
       const system = payload.messages[0]?.content ?? '';
       let result: unknown = {};
-      if (system.includes('[TASK:riskScore]'))
+      if (system.includes('[TASK:ideaQueries]')) result = { queries: ['sandbox'] };
+      else if (system.includes('[TASK:rankProjects]'))
+        result = {
+          projects: [
+            {
+              repo: 'tester/sandbox',
+              reason: 'A real fixture matching input-validation work.',
+              directions: ['Improve whitespace handling'],
+            },
+          ],
+        };
+      else if (system.includes('[TASK:repositoryScan]'))
+        result = {
+          findings: [
+            {
+              path: 'src/review.ts',
+              line: 4,
+              kind: 'bug',
+              title: 'Handle whitespace-only input',
+              explanation: 'The trimmed value can be an empty string.',
+              evidence: 'return value;',
+              suggestion: 'Return null for whitespace-only input.',
+              verification: ['Add a whitespace-only test'],
+              confidence: 0.9,
+              relatedIssues: [],
+            },
+          ],
+        };
+      else if (system.includes('[TASK:codeChanges]'))
+        result = {
+          title: 'Guard whitespace-only input',
+          body: 'Return null for whitespace-only inputs.',
+          verification: ['Add and run a whitespace-only regression test'],
+          changes: [
+            {
+              path: 'src/review.ts',
+              action: 'edit',
+              edits: [{ original: 'return value;', replacement: 'return value || null;' }],
+            },
+          ],
+        };
+      else if (system.includes('[TASK:riskScore]'))
         result = {
           files: [
             { path: 'src/review.ts', score: 4, reasons: ['Input behavior changes'] },
@@ -368,6 +509,7 @@ export async function initializeTestContext() {
     sessions: createSessionService(databaseSessionStore(db)),
     workspace,
     userId: user!.id,
+    contributionUserId: contributionUser!.id,
     ai,
   };
 }

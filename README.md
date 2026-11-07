@@ -1,10 +1,14 @@
 # OpenSelf
 
-A bilingual GitHub contribution workspace. Issues and review comments are drafts until a user explicitly approves publication.
+A bilingual GitHub contribution workspace. Issues, review comments and new pull requests are drafts until a user explicitly approves publication.
 
-初次使用请打开 [中文操作手册](docs/OpenSelf-操作手册.html)：从保存第一份草稿开始，逐步学习个人 API Key、Issue、PR 审查和确认发布。下载到本地后可直接用浏览器打开，也可打印为 PDF。
+初次使用请打开 [中文操作手册](docs/OpenSelf-操作手册.html)：从保存第一份草稿开始，逐步学习个人 API Key、Issue、PR 审查、AI 找项目与生成代码改动。下载到本地后可直接用浏览器打开，也可打印为 PDF。
 
 登录后，工作台上方的「我的仓库」会显示当前 GitHub 账号名下的仓库，点击即可直接查看该仓库的 PR，不必再搜索自己的项目。
+
+顶部「AI 贡献」提供两个入口：用自然语言描述想法，AI 根据真实 GitHub 搜索和 README 推荐项目；或者输入公开仓库，扫描源代码并给出带文件、行号、证据和验证步骤的改进候选。每条候选可继续起草 Issue，或生成代码改动预览。检查差异、标题和正文，保存 PR 草稿，再到草稿队列确认发布；有写权限时创建独立分支，否则在自己的 fork 中创建分支并向原仓库提 PR。默认创建草稿 PR，不自动合并。
+
+仓库体检只支持公开仓库，默认最多分析 20 个文件（可选 10/20/50/100），每文件最多 400 行、16,000 字符，总计最多 160,000 字符。页面会列出覆盖范围和跳过原因。结果是静态分析候选，不保证缺陷成立；生成改动最多涉及 5 个文件，不执行目标仓库的代码或测试。密钥、工作流、二进制和生成文件等会跳过。发布前发现源仓库版本变化时需重新扫描。
 
 ## Current status
 

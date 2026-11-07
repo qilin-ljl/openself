@@ -8,6 +8,8 @@ import { randomUUID, createHash } from 'node:crypto';
 import { buildFormBody } from '@openself/github/templates';
 import { recordEdit } from './style-feedback';
 import { validateAIReview, recordReviewFeedback } from './review-feedback';
+import { preparePullRequestPayload, publishPreparedPullRequest } from './pull-request-publishing';
+import { PullRequestPayload } from '@openself/shared/contributions';
 export type Draft = typeof schema.drafts.$inferSelect;
 export type User = typeof schema.users.$inferSelect;
 export interface DraftDependencies {
@@ -76,13 +78,15 @@ export function createDraftService(deps: DraftDependencies) {
       const payload =
         parsed.kind === 'issue'
           ? await validateIssue(user, parsed.repo, parsed.payload)
-          : await prepareReview(
-              await deps.githubFor(user.id),
-              user,
-              parsed.repo,
-              parsed.prNumber,
-              parsed.payload,
-            );
+          : parsed.kind === 'review'
+            ? await prepareReview(
+                await deps.githubFor(user.id),
+                user,
+                parsed.repo,
+                parsed.prNumber,
+                parsed.payload,
+              )
+            : await preparePullRequestPayload(db, user, parsed.repo, parsed.payload);
       if (parsed.kind === 'review') {
         await validateAIReview(db, user.id, parsed.repo, parsed.prNumber, payload as ReviewPayload);
         if ((payload as ReviewPayload).reviewSessionId) payload.aiGenerated = true;
@@ -112,13 +116,15 @@ export function createDraftService(deps: DraftDependencies) {
       const payload =
         existing.kind === 'issue'
           ? await validateIssue(user, existing.repoFullName, IssuePayload.parse(input))
-          : await prepareReview(
-              await deps.githubFor(user.id),
-              user,
-              existing.repoFullName,
-              existing.targetNumber!,
-              ReviewPayload.parse(input),
-            );
+          : existing.kind === 'review'
+            ? await prepareReview(
+                await deps.githubFor(user.id),
+                user,
+                existing.repoFullName,
+                existing.targetNumber!,
+                ReviewPayload.parse(input),
+              )
+            : await preparePullRequestPayload(db, user, existing.repoFullName, input);
       if (existing.kind === 'review') {
         await validateAIReview(
           db,
@@ -236,7 +242,8 @@ export function createDraftService(deps: DraftDependencies) {
         return { draft, user };
       });
       if (!claimed) return;
-      let sent = false;
+      let sent = false,
+        confirmedMutation = false;
       try {
         const { draft, user } = claimed;
         const [owner, repo] = draft.repoFullName.split('/') as [string, string];
@@ -249,7 +256,13 @@ export function createDraftService(deps: DraftDependencies) {
                 draft.targetNumber!,
                 ReviewPayload.parse(draft.payloadJson),
               )
-            : await validateIssue(user, draft.repoFullName, IssuePayload.parse(draft.payloadJson));
+            : draft.kind === 'pull_request'
+              ? await preparePullRequestPayload(db, user, draft.repoFullName, draft.payloadJson)
+              : await validateIssue(
+                  user,
+                  draft.repoFullName,
+                  IssuePayload.parse(draft.payloadJson),
+                );
         if (draft.kind === 'issue' && payload.body !== IssuePayload.parse(draft.payloadJson).body)
           throw new AppError('template_changed', 409);
         let body = payload.body;
@@ -259,7 +272,7 @@ export function createDraftService(deps: DraftDependencies) {
               ? `\n\n---\n<sub>本内容由 OpenSelf AI 辅助起草，经 @${user.login} 审核后发布。</sub>`
               : `\n\n---\n<sub>Drafted with AI assistance via OpenSelf and reviewed by @${user.login}.</sub>`;
         const github = await deps.githubFor(user.id);
-        sent = true;
+        if (draft.kind !== 'pull_request') sent = true;
         const result =
           draft.kind === 'review'
             ? await github.submitReview(owner, repo, draft.targetNumber!, {
@@ -268,11 +281,22 @@ export function createDraftService(deps: DraftDependencies) {
                 body,
                 comments: (payload as ReviewPayload).comments,
               })
-            : await github.createIssue(owner, repo, {
-                title: payload.title,
-                body,
-                labels: (payload as IssuePayload).labels,
-              });
+            : draft.kind === 'pull_request'
+              ? await publishPreparedPullRequest(
+                  github,
+                  user,
+                  draft.id,
+                  PullRequestPayload.parse({ ...payload, body }),
+                  (phase) => {
+                    sent = true;
+                    if (phase === 'confirmed') confirmedMutation = true;
+                  },
+                )
+              : await github.createIssue(owner, repo, {
+                  title: payload.title,
+                  body,
+                  labels: (payload as IssuePayload).labels,
+                });
         await db.transaction(async (tx) => {
           await tx
             .update(schema.drafts)
@@ -280,7 +304,12 @@ export function createDraftService(deps: DraftDependencies) {
             .where(eq(schema.drafts.id, id));
           await tx.insert(schema.auditLog).values({
             userId: user.id,
-            action: draft.kind === 'review' ? 'review.submit' : 'issue.create',
+            action:
+              draft.kind === 'review'
+                ? 'review.submit'
+                : draft.kind === 'pull_request'
+                  ? 'pull_request.create'
+                  : 'issue.create',
             repoFullName: draft.repoFullName,
             target: String(draft.kind === 'review' ? draft.targetNumber : result.number),
             githubUrl: result.url,
@@ -291,7 +320,11 @@ export function createDraftService(deps: DraftDependencies) {
         });
       } catch (error) {
         const known = error instanceof AppError;
-        const uncertain = sent && (!known || error.code === 'unknown');
+        const uncertain =
+          sent &&
+          (!known ||
+            error.code === 'unknown' ||
+            (initial.kind === 'pull_request' && confirmedMutation));
         await db
           .update(schema.drafts)
           .set({

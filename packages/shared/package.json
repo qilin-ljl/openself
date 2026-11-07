@@ -7,6 +7,7 @@
     "./api": "./api.ts",
     "./errors": "./errors.ts",
     "./ai": "./ai.ts",
+    "./contributions": "./contributions.ts",
     "./github-url": "./github-url.ts"
   },
   "scripts": {

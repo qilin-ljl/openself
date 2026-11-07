@@ -9,6 +9,7 @@ export type TestContext = {
   sessions: ReturnType<typeof createSessionService>;
   workspace: Workspace;
   userId: string;
+  contributionUserId?: string;
   ai?: AIService;
 };
 declare global {

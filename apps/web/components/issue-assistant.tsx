@@ -14,6 +14,7 @@ export function IssueAssistant({
   onDraft,
   onTranslation,
   allowTranslationApply = true,
+  initialDescription,
 }: {
   repo: string;
   templateId?: string;
@@ -21,6 +22,7 @@ export function IssueAssistant({
   onDraft: (draft: DraftResult) => void;
   onTranslation: (body: string) => void;
   allowTranslationApply?: boolean;
+  initialDescription?: string;
 }) {
   const t = useTranslations('ai'),
     locale = useLocale();
@@ -36,6 +38,9 @@ export function IssueAssistant({
     [duplicates, setDuplicates] =
       useState<{ number: number; title: string; url: string; reason: string; verdict: string }[]>();
   const task = useResource<JobDTO>(job ? '/api/jobs/' + job : null, 2000);
+  useEffect(() => {
+    if (initialDescription) setText((value) => value || initialDescription);
+  }, [initialDescription]);
   useEffect(() => {
     if (task.data?.status !== 'done') return;
     const value = task.data.resultJson;

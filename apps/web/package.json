@@ -20,6 +20,7 @@
     "@tailwindcss/postcss": "latest",
     "arctic": "latest",
     "dotenv": "latest",
+    "fast-diff": "1.3.0",
     "lucide-react": "latest",
     "next": "latest",
     "next-intl": "latest",

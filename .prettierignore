@@ -1,5 +1,6 @@
 pnpm-lock.yaml
 .next
+.next-e2e
 .turbo
 node_modules
 packages/db/migrations/meta

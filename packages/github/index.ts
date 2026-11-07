@@ -145,6 +145,122 @@ export function createGitHubClient(
   return {
     getPull,
     listPullFiles,
+    getGitCommit: (owner: string, repo: string, sha: string) =>
+      read('git-commit:' + owner + '/' + repo + '@' + sha, (headers) =>
+        octokit.rest.git.getCommit({ owner, repo, commit_sha: sha, headers }),
+      ),
+    getGitTree: (owner: string, repo: string, sha: string) =>
+      read('git-tree:' + owner + '/' + repo + '@' + sha, (headers) =>
+        octokit.rest.git.getTree({ owner, repo, tree_sha: sha, recursive: '1', headers }),
+      ),
+    getGitBlob: (owner: string, repo: string, sha: string) =>
+      read('git-blob:' + owner + '/' + repo + '@' + sha, (headers) =>
+        octokit.rest.git.getBlob({ owner, repo, file_sha: sha, headers }),
+      ),
+    getGitRef: (owner: string, repo: string, branch: string) =>
+      read(
+        'git-ref:' + owner + '/' + repo + '@' + branch,
+        (headers) => octokit.rest.git.getRef({ owner, repo, ref: 'heads/' + branch, headers }),
+        true,
+      ),
+    createFork: (owner: string, repo: string) =>
+      request(
+        async () =>
+          (
+            await octokit.rest.repos.createFork({
+              owner,
+              repo,
+              default_branch_only: false,
+              request: { retries: 0 },
+            })
+          ).data,
+      ),
+    createGitRef: (owner: string, repo: string, branch: string, sha: string) =>
+      request(
+        async () =>
+          (
+            await octokit.rest.git.createRef({
+              owner,
+              repo,
+              ref: 'refs/heads/' + branch,
+              sha,
+              request: { retries: 0 },
+            })
+          ).data,
+      ),
+    createGitBlob: (owner: string, repo: string, content: string) =>
+      request(
+        async () =>
+          (
+            await octokit.rest.git.createBlob({
+              owner,
+              repo,
+              content: Buffer.from(content, 'utf8').toString('base64'),
+              encoding: 'base64',
+              request: { retries: 0 },
+            })
+          ).data.sha,
+      ),
+    createGitTree: (
+      owner: string,
+      repo: string,
+      baseTree: string,
+      tree: { path: string; mode: '100644' | '100755'; type: 'blob'; sha: string }[],
+    ) =>
+      request(
+        async () =>
+          (
+            await octokit.rest.git.createTree({
+              owner,
+              repo,
+              base_tree: baseTree,
+              tree,
+              request: { retries: 0 },
+            })
+          ).data.sha,
+      ),
+    createGitCommit: (owner: string, repo: string, message: string, tree: string, parent: string) =>
+      request(
+        async () =>
+          (
+            await octokit.rest.git.createCommit({
+              owner,
+              repo,
+              message,
+              tree,
+              parents: [parent],
+              request: { retries: 0 },
+            })
+          ).data.sha,
+      ),
+    updateGitRef: (owner: string, repo: string, branch: string, sha: string) =>
+      request(
+        async () =>
+          (
+            await octokit.rest.git.updateRef({
+              owner,
+              repo,
+              ref: 'heads/' + branch,
+              sha,
+              force: false,
+              request: { retries: 0 },
+            })
+          ).data,
+      ),
+    createPullRequest: (
+      owner: string,
+      repo: string,
+      data: { title: string; body: string; base: string; head: string; draft: boolean },
+    ) =>
+      request(async () => {
+        const result = await octokit.rest.pulls.create({
+          owner,
+          repo,
+          ...data,
+          request: { retries: 0 },
+        });
+        return { number: result.data.number, url: result.data.html_url };
+      }),
     getBranchSha: async (owner: string, repo: string, ref: string) => {
       const result = await read(`commit:${owner}/${repo}:${ref}`, (headers) =>
         octokit.rest.repos.getCommit({ owner, repo, ref, headers }),

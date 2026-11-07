@@ -19,6 +19,13 @@ import { encrypt } from './crypto';
 import { recordEdit } from './style-feedback';
 import { repositoryLanguage } from './review-analysis';
 import { redisConnection } from './queue';
+import {
+  IdeaInput,
+  RepositoryScanInput,
+  RepositoryScanResult,
+  PrepareChangeInput,
+} from '@openself/shared/contributions';
+import { discoverProjects, scanRepository, prepareCodeChange } from './contributions';
 export type AIKind =
   | 'review.run'
   | 'rulecard.build'
@@ -26,7 +33,10 @@ export type AIKind =
   | 'issue.check'
   | 'issue.draft'
   | 'issue.quality'
-  | 'translate';
+  | 'translate'
+  | 'discovery.find'
+  | 'repository.scan'
+  | 'change.prepare';
 type Payload = { input: unknown; billing: Billing; reviewSessionId?: string; lang: 'zh' | 'en' };
 export function createAIService(ctx: AIContext) {
   const { db, env, workspace } = ctx;
@@ -133,10 +143,54 @@ export function createAIService(ctx: AIContext) {
       })),
     };
   }
+  async function getScan(userId: string, jobId: string) {
+    const job = await getJob(userId, jobId);
+    if (job.kind !== 'repository.scan' || job.status !== 'done')
+      throw new AppError('scan_not_ready', 409);
+    return RepositoryScanResult.parse(job.resultJson);
+  }
   return {
     getJob,
     getReview,
     enqueue,
+    discover: (user: User, input: unknown) =>
+      submit(user, 'discovery.find', IdeaInput.parse(input)),
+    async scan(user: User, input: unknown) {
+      const parsed = RepositoryScanInput.parse(input);
+      const [owner, name] = parsed.repo.split('/') as [string, string];
+      const repository = await workspace.assertRepo(user, owner, name);
+      if (repository.private) throw new AppError('scan_public_only', 403);
+      return submit(user, 'repository.scan', parsed);
+    },
+    async prepareChange(user: User, input: unknown) {
+      const parsed = PrepareChangeInput.parse(input);
+      const scan = await getScan(user.id, parsed.scanJobId);
+      if (!scan.findings.some((finding) => finding.id === parsed.findingId))
+        throw new AppError('not_found', 404);
+      return submit(user, 'change.prepare', parsed);
+    },
+    async findingContext(user: User, scanJobId: string, findingId: string) {
+      const scan = await getScan(user.id, scanJobId);
+      const finding = scan.findings.find((item) => item.id === findingId);
+      if (!finding) throw new AppError('not_found', 404);
+      const note =
+        user.locale === 'zh'
+          ? '这是静态源码分析得到的候选问题，尚未执行复现或测试。请基于证据起草 Issue，不要声称已复现。'
+          : 'This is a static-analysis candidate. Reproduction and tests have not been executed. Draft an issue grounded in this evidence without claiming reproduction.';
+      return {
+        repo: scan.repo,
+        title: finding.title,
+        description: [
+          note,
+          finding.title,
+          finding.explanation,
+          finding.sourceUrl,
+          finding.evidence,
+          finding.suggestion,
+          ...finding.verification,
+        ].join('\n\n'),
+      };
+    },
     async startReview(user: User, input: unknown) {
       const parsed = StartReview.parse(input),
         repo = parsed.repo.toLowerCase();
@@ -416,12 +470,26 @@ export function createAIService(ctx: AIContext) {
           ? await ctx.provider(user.id, payload.billing, observe)
           : await resolveProvider(db, env, user.id, payload.billing, undefined, observe);
         const run: RunContext = { ...ctx, user, provider, lang: payload.lang };
+        const changeInput =
+          job.kind === 'change.prepare' ? PrepareChangeInput.parse(payload.input) : null;
         const result =
           job.kind === 'review.run'
             ? await runReview(run, payload.reviewSessionId!)
             : job.kind === 'rulecard.build'
               ? await buildRulecard(run, z.object({ repo: z.string() }).parse(payload.input).repo)
-              : await runAssistantTask(run, job.kind, payload.input);
+              : job.kind === 'discovery.find'
+                ? await discoverProjects(run, payload.input)
+                : job.kind === 'repository.scan'
+                  ? await scanRepository(run, payload.input)
+                  : changeInput
+                    ? await prepareCodeChange(
+                        run,
+                        await getScan(user.id, changeInput.scanJobId),
+                        changeInput.findingId,
+                        changeInput.instruction,
+                        changeInput.scanJobId,
+                      )
+                    : await runAssistantTask(run, job.kind, payload.input);
         await db
           .update(schema.aiJobs)
           .set({

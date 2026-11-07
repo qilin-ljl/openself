@@ -28,6 +28,9 @@ export function RepositorySearch() {
           <h1>{t('searchTitle')}</h1>
           <p>{t('searchDescription')}</p>
         </div>
+        <Link className="text-link" href="/contribute">
+          {t('ideaSearch')}
+        </Link>
       </div>
       <label className="search-field">
         <Search size={21} />

@@ -1,4 +1,4 @@
-export { untrusted } from './common';
+export { untrusted, SAFETY } from './common';
 export { riskScore } from './riskScore';
 export { review } from './review';
 export { rulecard } from './rulecard';

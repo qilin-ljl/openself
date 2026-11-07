@@ -22,6 +22,13 @@ async function route(request: NextRequest, { params }: { params: Promise<{ path:
       method = request.method;
     const github = await workspace.githubFor(user.id);
     const page = () => PageNumber.parse(query.get('page') ?? undefined);
+    if (path.length === 1 && method === 'POST') {
+      if (path[0] === 'discover-projects') return getAI().discover(user, await body(request));
+      if (path[0] === 'scan-repository') return getAI().scan(user, await body(request));
+      if (path[0] === 'prepare-change') return getAI().prepareChange(user, await body(request));
+    }
+    if (path[0] === 'scans' && path.length === 4 && path[2] === 'findings' && method === 'GET')
+      return getAI().findingContext(user, z.uuid().parse(path[1]), z.uuid().parse(path[3]));
     if (path[0] === 'radar' && path.length === 1 && method === 'GET')
       return createRadar(getRuntime().db, workspace).get(user);
     if (path[0] === 'reviews') {

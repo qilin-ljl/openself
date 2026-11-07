@@ -8,8 +8,11 @@ import { api, ErrorNotice, Loading, RequestError, useResource } from './data';
 import { Markdown } from './markdown';
 import { IssueEditor } from './issue-editor';
 import { ReviewDraftEditor } from './review-draft-editor';
+import { PullRequestDraftEditor } from './pull-request-draft-editor';
+import { CodeChanges } from './code-changes';
 export function DraftQueue() {
-  const t = useTranslations('workspace');
+  const t = useTranslations('workspace'),
+    c = useTranslations('contribute');
   const [status, setStatus] = useState(''),
     [editing, setEditing] = useState<string>(),
     [busy, setBusy] = useState<string>(),
@@ -22,7 +25,9 @@ export function DraftQueue() {
     if (
       !window.confirm(
         action === 'approve'
-          ? t('confirmPublish', { repo: draft.repoFullName })
+          ? draft.kind === 'pull_request'
+            ? c('confirmPR', { repo: draft.repoFullName })
+            : t('confirmPublish', { repo: draft.repoFullName })
           : t('confirmDiscard'),
       )
     )
@@ -77,13 +82,22 @@ export function DraftQueue() {
                   {d.repoFullName}
                 </span>
                 <h2>{d.payloadJson.title}</h2>
+                {d.kind === 'pull_request' && <small>{c('newPullRequest')}</small>}
               </div>
               <span className={'status-badge status-' + d.status}>{t('status.' + d.status)}</span>
             </header>
             <ErrorNotice code={d.error ?? undefined} />
             {editing === d.id ? (
               <>
-                {d.kind === 'review' ? (
+                {d.kind === 'pull_request' ? (
+                  <PullRequestDraftEditor
+                    draft={d}
+                    onSaved={() => {
+                      setEditing(undefined);
+                      resource.reload();
+                    }}
+                  />
+                ) : d.kind === 'review' ? (
                   <ReviewDraftEditor
                     draft={d}
                     onSaved={() => {
@@ -109,6 +123,21 @@ export function DraftQueue() {
               <details>
                 <summary>{t('preview')}</summary>
                 <Markdown body={d.payloadJson.body} />
+                {d.kind === 'pull_request' && (
+                  <div>
+                    <p>
+                      {c('sourceCommit', {
+                        sha: d.payloadJson.baseSha.slice(0, 8),
+                        branch: d.payloadJson.baseBranch,
+                      })}
+                    </p>
+                    <p className="notice">
+                      {d.payloadJson.asDraft ? c('createDraftPR') : c('createReadyPR')}
+                    </p>
+                    <p>{c('forkNotice')}</p>
+                    <CodeChanges files={d.payloadJson.files} />
+                  </div>
+                )}
                 {d.kind === 'review' && (
                   <div className="review-preview">
                     <strong>{t(d.payloadJson.event)}</strong>

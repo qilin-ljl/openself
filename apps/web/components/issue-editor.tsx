@@ -14,14 +14,23 @@ export function IssueEditor({
   repoFullName,
   initial,
   onSaved,
+  scanJobId,
+  findingId,
 }: {
   repoFullName: string;
   initial?: DraftDTO;
   onSaved?: () => void;
+  scanJobId?: string;
+  findingId?: string;
 }) {
   const t = useTranslations('workspace'),
     locale = useLocale();
   const original = initial?.payloadJson as IssuePayload | undefined;
+  const context = useResource<{ repo: string; title: string; description: string }>(
+    scanJobId && findingId
+      ? '/api/scans/' + encodeURIComponent(scanJobId) + '/findings/' + encodeURIComponent(findingId)
+      : null,
+  );
   const resource = useResource<Awaited<ReturnType<GitHubClient['listIssueTemplates']>>>(
     '/api/repos/' + repoFullName + '/issue-templates',
   );
@@ -90,7 +99,11 @@ export function IssueEditor({
   }
   return (
     <>
+      <ErrorNotice code={context.error} retry={context.reload} />
       <IssueAssistant
+        initialDescription={
+          context.data?.repo === repoFullName.toLowerCase() ? context.data.description : undefined
+        }
         allowTranslationApply={template?.kind !== 'form'}
         repo={repoFullName}
         templateId={selected || undefined}

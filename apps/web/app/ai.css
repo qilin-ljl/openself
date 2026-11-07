@@ -11,6 +11,135 @@
   gap: 20px;
   margin-bottom: 20px;
 }
+.contribution-entry,
+.direct-scan,
+.project-match,
+.scan-finding {
+  border: 1px solid var(--line);
+  padding: 24px;
+  margin-bottom: 24px;
+}
+.contribution-entry textarea {
+  min-height: 130px;
+}
+.contribution-entry .muted,
+.direct-scan p,
+.project-match p,
+.scan-report > p {
+  font-size: 13px;
+  line-height: 1.8;
+}
+.direct-scan {
+  background: var(--surface);
+}
+.direct-scan h2,
+.project-matches h2,
+.scan-report h2 {
+  font-size: 20px;
+  font-weight: 650;
+  margin-bottom: 12px;
+}
+.direct-scan .inline-actions {
+  margin-top: 16px;
+}
+.direct-scan input {
+  min-width: 320px;
+  padding: 12px;
+  border: 1px solid var(--line);
+  background: white;
+}
+.project-match h3 {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  color: var(--accent);
+  font-size: 17px;
+}
+.project-match ul,
+.scan-finding ul {
+  padding-left: 22px;
+  margin: 16px 0;
+  font-size: 14px;
+  line-height: 1.8;
+}
+.scan-finding {
+  border-left: 3px solid var(--accent);
+  margin-top: 20px;
+}
+.scan-finding h3 {
+  margin: 14px 0;
+  font-size: 18px;
+}
+.scan-finding h4 {
+  margin-top: 16px;
+  font-size: 14px;
+}
+.scan-finding p {
+  font-size: 14px;
+  line-height: 1.9;
+}
+.scan-finding pre,
+.code-change-file pre {
+  margin: 16px 0;
+  padding: 16px;
+  background: var(--surface);
+  overflow: auto;
+  max-height: 540px;
+  font:
+    12px/1.8 Consolas,
+    monospace;
+  tab-size: 2;
+}
+.scan-coverage {
+  margin: 20px 0;
+  border: 1px solid var(--line);
+  padding: 16px;
+  font-size: 12px;
+}
+.scan-coverage summary {
+  cursor: pointer;
+  font-size: 14px;
+}
+.scan-coverage p {
+  overflow-wrap: anywhere;
+  margin-top: 8px;
+}
+.code-change-file {
+  margin: 18px 0;
+  border: 1px solid var(--line);
+}
+.code-change-file summary {
+  padding: 15px 18px;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 600;
+  overflow-wrap: anywhere;
+}
+.code-change-file summary span {
+  margin-left: 18px;
+  font-weight: 400;
+  color: var(--muted);
+}
+.code-change-file pre {
+  margin: 0;
+  border-top: 1px solid var(--line);
+}
+.code-insert {
+  background: #daf5e3;
+  color: #116b32;
+}
+.code-delete {
+  background: #fde2e5;
+  color: #9e2738;
+  text-decoration: line-through;
+}
+.change-preview > .field-label,
+.scan-report > .field-label {
+  margin: 22px 0;
+}
+.change-preview > .inline-actions {
+  margin-top: 22px;
+}
 .ai-panel h2,
 .ai-settings h2 {
   font-size: 18px;

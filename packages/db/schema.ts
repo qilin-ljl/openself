@@ -136,7 +136,7 @@ export const drafts = pgTable(
     id: id(),
     createdAt: createdAt(),
     userId: userId(),
-    kind: text('kind', { enum: ['issue', 'review'] }).notNull(),
+    kind: text('kind', { enum: ['issue', 'review', 'pull_request'] }).notNull(),
     repoFullName: text('repo_full_name').notNull(),
     targetNumber: integer('target_number'),
     status: text('status', {
@@ -152,7 +152,7 @@ export const drafts = pgTable(
   },
   (table) => [
     index('drafts_user_status_idx').on(table.userId, table.status),
-    check('draft_kind', sql`${table.kind} in ('issue','review')`),
+    check('draft_kind', sql`${table.kind} in ('issue','review','pull_request')`),
     check(
       'draft_status',
       sql`${table.status} in ('draft','approved','publishing','published','failed','discarded')`,
@@ -266,7 +266,9 @@ export const auditLog = pgTable(
     id: id(),
     createdAt: createdAt(),
     userId: userId(),
-    action: text('action', { enum: ['issue.create', 'review.submit'] }).notNull(),
+    action: text('action', {
+      enum: ['issue.create', 'review.submit', 'pull_request.create'],
+    }).notNull(),
     repoFullName: text('repo_full_name').notNull(),
     target: text('target').notNull(),
     githubUrl: text('github_url').notNull(),
