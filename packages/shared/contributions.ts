@@ -66,6 +66,7 @@ export const RepositoryScanResult = z.object({
   eligibleFiles: z.number(),
   examinedFiles: z.number(),
   examinedCharacters: z.number(),
+  analysisFailedFiles: z.number().int().nonnegative().default(0),
   skippedCount: z.number(),
   scanned: z.array(
     z.object({ path: z.string(), lines: z.number(), totalLines: z.number(), partial: z.boolean() }),

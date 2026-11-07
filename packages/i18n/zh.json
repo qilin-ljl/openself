@@ -408,6 +408,7 @@
     "partialFile": "只检查部分内容",
     "changeInstruction": "补充改动要求（可选）",
     "noFindings": "当前检查范围内没有得到可核实的候选问题，不代表整个仓库不存在问题。",
+    "analysisIncomplete": "本次报告不完整：{count} 个文件的 AI 输出未通过校验，未计入已分析范围。其他有效结果已保留；不能据此认定这些文件没有问题。",
     "verificationPlan": "建议验证步骤（未执行）",
     "prepareCode": "准备代码改动",
     "draftIssue": "用此发现起草 Issue",
@@ -442,6 +443,7 @@
       "empty": "空文件",
       "scan_budget": "达到本次读取上限",
       "finding_budget": "达到候选结果上限",
+      "analysis_failed": "AI 输出校验失败，未完成分析",
       "other": "未能读取或未纳入本次分析"
     }
   }

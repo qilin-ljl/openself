@@ -408,6 +408,7 @@
     "partialFile": "Partial coverage",
     "changeInstruction": "Additional change instructions (optional)",
     "noFindings": "No evidence-backed candidates were found in the examined scope. This is not a clean bill of health for the entire repository.",
+    "analysisIncomplete": "Incomplete report: AI output validation failed for {count} files. They are excluded from analyzed coverage; other valid results are retained. This does not mean the failed files are free of issues.",
     "verificationPlan": "Suggested verification (not executed)",
     "prepareCode": "Prepare code changes",
     "draftIssue": "Draft an issue from this finding",
@@ -442,6 +443,7 @@
       "empty": "Empty file",
       "scan_budget": "Read budget reached",
       "finding_budget": "Candidate budget reached",
+      "analysis_failed": "AI output validation failed; analysis incomplete",
       "other": "Unavailable or outside this scan"
     }
   }

@@ -239,33 +239,52 @@ export async function scanRepository(
   const findings: RepositoryScanResult['findings'] = [],
     seen = new Set<string>();
   let invalidFindings = 0;
+  let analysisFailedFiles = 0;
+  const analyzed: typeof sources = [];
   for (let offset = 0; offset < sources.length; offset += 2) {
     const batch = sources.slice(offset, offset + 2);
-    const result = await ctx.provider.completeJSON({
-      tier: 'deep',
-      system:
-        '[TASK:repositoryScan] ' +
-        SAFETY +
-        ' ' +
-        language(ctx) +
-        ' Inspect the supplied code for concrete candidate bugs or useful improvements. These are static-analysis candidates; no code or tests were executed. Return only findings supported by the exact supplied code. Each finding must use an existing path and absolute line number, and evidence copied exactly from that line without the line-number prefix. Do not report issues merely because code was truncated. relatedIssues must reference supplied issue numbers. Return {"findings":[{"path":"src.ts","line":2,"kind":"bug","title":"...","explanation":"...","evidence":"exact code","suggestion":"...","verification":["steps to verify"],"confidence":0.9,"relatedIssues":[]}]}; kind is bug, improvement, tests or docs. Empty findings are valid.',
-      user: untrusted({
-        repo: parsed.repo,
-        goal: parsed.goal,
-        baseSha,
-        recentIssues: issues,
-        files: batch.map((file) => ({
-          path: file.entry.path,
-          partial: file.partial,
-          code: file.body
-            .split('\n')
-            .map((line, index) => index + 1 + ': ' + line)
-            .join('\n'),
-        })),
-      }),
-      schema: ScanBatch,
-      maxTokens: 8000,
-    });
+    const analyze = (tier: 'deep' | 'fast') =>
+      ctx.provider.completeJSON({
+        tier,
+        system:
+          '[TASK:repositoryScan] ' +
+          SAFETY +
+          ' ' +
+          language(ctx) +
+          ' Keep the response compact: at most four findings, title at most 200 characters, explanation and suggestion at most 1000 characters each, evidence 5–1000 characters. Use at most five verification strings (each at most 1000 characters), confidence as a number from 0 to 1, and at most five positive integer relatedIssues. ' +
+          ' Inspect the supplied code for concrete candidate bugs or useful improvements. These are static-analysis candidates; no code or tests were executed. Return only findings supported by the exact supplied code. Each finding must use an existing path and absolute line number, and evidence copied exactly from that line without the line-number prefix. Do not report issues merely because code was truncated. relatedIssues must reference supplied issue numbers. Return {"findings":[{"path":"src.ts","line":2,"kind":"bug","title":"...","explanation":"...","evidence":"exact code","suggestion":"...","verification":["steps to verify"],"confidence":0.9,"relatedIssues":[]}]}; kind is bug, improvement, tests or docs. Empty findings are valid.',
+        user: untrusted({
+          repo: parsed.repo,
+          goal: parsed.goal,
+          baseSha,
+          recentIssues: issues,
+          files: batch.map((file) => ({
+            path: file.entry.path,
+            partial: file.partial,
+            code: file.body
+              .split('\n')
+              .map((line, index) => index + 1 + ': ' + line)
+              .join('\n'),
+          })),
+        }),
+        schema: ScanBatch,
+        maxTokens: tier === 'deep' ? 8000 : 5000,
+      });
+    let result;
+    try {
+      try {
+        result = await analyze('deep');
+      } catch (error) {
+        if (!(error instanceof AppError && error.code === 'llm_output_invalid')) throw error;
+        result = await analyze('fast');
+      }
+    } catch (error) {
+      if (!(error instanceof AppError && error.code === 'llm_output_invalid')) throw error;
+      analysisFailedFiles += batch.length;
+      for (const file of batch) skipped.push({ path: file.entry.path, reason: 'analysis_failed' });
+      continue;
+    }
+    analyzed.push(...batch);
     for (const finding of result.data.findings) {
       const source = batch.find((file) => file.entry.path === finding.path);
       if (
@@ -308,9 +327,10 @@ export async function scanRepository(
     baseSha,
     treeTruncated: tree.truncated,
     eligibleFiles: eligible.length,
-    examinedFiles: sources.length,
-    examinedCharacters: sources.reduce((sum, file) => sum + file.body.length, 0),
-    scanned: sources.map((file) => ({
+    examinedFiles: analyzed.length,
+    examinedCharacters: analyzed.reduce((sum, file) => sum + file.body.length, 0),
+    analysisFailedFiles,
+    scanned: analyzed.map((file) => ({
       path: file.entry.path,
       lines: file.lines,
       totalLines: file.totalLines,

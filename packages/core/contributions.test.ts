@@ -2,6 +2,7 @@ import { beforeAll, afterAll, afterEach, expect, it } from 'vitest';
 import { http, HttpResponse } from 'msw';
 import { setupServer } from 'msw/node';
 import { createGitHubClient } from '@openself/github';
+import { AppError } from '@openself/shared/errors';
 import type { LLMProvider } from '@openself/llm';
 import type { Database } from '@openself/db';
 import { parseEnv } from '@openself/shared/env';
@@ -217,4 +218,76 @@ it('refuses a change proposal when the source branch has moved', async () => {
       '11111111-1111-4111-8111-111111111111',
     ),
   ).rejects.toMatchObject({ code: 'stale_repository' });
+});
+
+it('retries only the invalid scan batch with the fast model', async () => {
+  const ctx = context(),
+    tiers: string[] = [];
+  ctx.provider = {
+    async completeJSON(options) {
+      tiers.push(options.tier);
+      if (options.tier === 'deep') throw new AppError('llm_output_invalid', 502);
+      return provider.completeJSON(options);
+    },
+  };
+  const result = await scanRepository(ctx, { repo: 'o/r', maxFiles: 20 });
+  expect(tiers).toEqual(['deep', 'fast']);
+  expect(result.examinedFiles).toBe(1);
+  expect(result.findings).toHaveLength(1);
+  expect(result.analysisFailedFiles).toBe(0);
+});
+it('reports failed analysis explicitly instead of counting unreadable model results as coverage', async () => {
+  const ctx = context();
+  ctx.provider = {
+    async completeJSON() {
+      throw new AppError('llm_output_invalid', 502);
+    },
+  };
+  const result = await scanRepository(ctx, { repo: 'o/r', maxFiles: 20 });
+  expect(result.analysisFailedFiles).toBe(1);
+  expect(result.examinedFiles).toBe(0);
+  expect(result.examinedCharacters).toBe(0);
+  expect(result.scanned).toEqual([]);
+  expect(result.skipped).toContainEqual({ path: 'src.ts', reason: 'analysis_failed' });
+});
+it('does not hide provider authentication failures as partial scan results', async () => {
+  const ctx = context();
+  ctx.provider = {
+    async completeJSON() {
+      throw new AppError('llm_key_invalid', 502);
+    },
+  };
+  await expect(scanRepository(ctx, { repo: 'o/r', maxFiles: 20 })).rejects.toMatchObject({
+    code: 'llm_key_invalid',
+  });
+});
+
+it('retains successful earlier batches when a later batch fails validation', async () => {
+  server.use(
+    http.get('https://api.github.com/repos/o/r/git/trees/' + treeSha, () =>
+      HttpResponse.json({
+        truncated: false,
+        tree: ['src.ts', 'z1.ts', 'z2.ts', 'z3.ts'].map((path) => ({
+          path,
+          sha: blobSha,
+          mode: '100644',
+          type: 'blob',
+          size: code.length,
+        })),
+      }),
+    ),
+  );
+  const ctx = context();
+  let calls = 0;
+  ctx.provider = {
+    async completeJSON(options) {
+      if (++calls > 1) throw new AppError('llm_output_invalid', 502);
+      return provider.completeJSON(options);
+    },
+  };
+  const result = await scanRepository(ctx, { repo: 'o/r', maxFiles: 20 });
+  expect(result.findings).toHaveLength(1);
+  expect(result.examinedFiles).toBe(2);
+  expect(result.analysisFailedFiles).toBe(2);
+  expect(result.scanned.map((file) => file.path)).toEqual(['src.ts', 'z1.ts']);
 });

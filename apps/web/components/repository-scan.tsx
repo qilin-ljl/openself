@@ -135,6 +135,11 @@ export function RepositoryScan({
             {t('sourceCommit', { sha: result.baseSha.slice(0, 8), branch: result.baseBranch })}
           </p>
           <p className="notice">{t('candidateNote')}</p>
+          {!!result.analysisFailedFiles && (
+            <p className="notice" role="alert">
+              {t('analysisIncomplete', { count: result.analysisFailedFiles })}
+            </p>
+          )}
           {result.treeTruncated && <p className="notice">{t('treeTruncated')}</p>}
           <details className="scan-coverage">
             <summary>{t('inspectCoverage')}</summary>
@@ -160,7 +165,9 @@ export function RepositoryScan({
               />
             </label>
           )}
-          {!result.findings.length && <p className="empty-state">{t('noFindings')}</p>}
+          {!result.findings.length && result.examinedFiles > 0 && (
+            <p className="empty-state">{t('noFindings')}</p>
+          )}
           {result.findings.map((finding) => (
             <article className="scan-finding" key={finding.id}>
               <div className="finding-meta">
